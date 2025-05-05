@@ -1,0 +1,173 @@
+<!-- backend/app/templates/report_template.html -->
+
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Persoonlijk Beleggingsadvies</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .date {
+            text-align: right;
+            color: #777;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #2c5282;
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #2c5282;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .summary-box {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .summary-item {
+            margin-bottom: 10px;
+        }
+        .bank-card {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .bank-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c5282;
+            margin-bottom: 10px;
+        }
+        .bank-desc {
+            margin-bottom: 15px;
+        }
+        .list-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        ul {
+            margin-top: 5px;
+        }
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            font-size: 12px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Persoonlijk Beleggingsadvies</h1>
+            <p>Gebaseerd op jouw voorkeuren en doelstellingen</p>
+        </div>
+        
+        <div class="date">
+            Gegenereerd op: {{ date }}
+        </div>
+        
+        <h2>Jouw Beleggingsprofiel</h2>
+        <div class="summary-box">
+            <div class="summary-item">
+                <strong>Beleggingsdoel:</strong> {{ preferences.investment_goal }}
+            </div>
+            <div class="summary-item">
+                <strong>Beleggingshorizon:</strong> {{ preferences.investment_horizon }}
+            </div>
+            <div class="summary-item">
+                <strong>Beheerstijl:</strong> {{ preferences.management_style }}
+            </div>
+            <div class="summary-item">
+                <strong>Belangrijkste voorkeur:</strong> {{ preferences.preference }}
+            </div>
+            <div class="summary-item">
+                <strong>Indicatief bedrag:</strong> {{ preferences.amount }}
+            </div>
+        </div>
+        
+        <h2>Analyse en Advies</h2>
+        <p>
+            Op basis van jouw antwoorden hebben we een analyse gemaakt van je beleggingsprofiel 
+            en de meest geschikte partners voor jouw situatie. Hieronder vind je onze aanbevelingen,
+            gerangschikt op basis van match met jouw profiel.
+        </p>
+        
+        <h2>Top 3 Meest Geschikte Beleggingspartners</h2>
+        
+        {% for bank in matches %}
+        <div class="bank-card">
+            <div class="bank-name">{{ bank.name }}</div>
+            <div class="bank-desc">{{ bank.description }}</div>
+            
+            <div class="list-title">Sterke punten:</div>
+            <ul>
+                {% for strength in bank.strengths %}
+                <li>{{ strength }}</li>
+                {% endfor %}
+            </ul>
+            
+            <div class="list-title">Aandachtspunten:</div>
+            <ul>
+                {% for weakness in bank.weaknesses %}
+                <li>{{ weakness }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endfor %}
+        
+        <h2>Vervolgstappen</h2>
+        <p>
+            Om verder te gaan met jouw beleggingsreis, raden wij de volgende stappen aan:
+        </p>
+        <ol>
+            <li>Neem contact op met de door jou gekozen partner voor een oriënterend gesprek</li>
+            <li>Bespreek jouw specifieke situatie en doelstellingen in detail</li>
+            <li>Vraag naar de mogelijkheden voor een persoonlijk beleggingsplan</li>
+            <li>Vergelijk de voorwaarden en kosten voordat je een definitieve keuze maakt</li>
+        </ol>
+        
+        <div class="footer">
+            <p>
+                <strong>Disclaimer:</strong> Dit document bevat geen beleggingsadvies in de zin van de wet. 
+                De informatie is puur informatief bedoeld en gebaseerd op jouw opgegeven voorkeuren. 
+                Voor een volledig advies, afgestemd op jouw persoonlijke situatie, raden wij aan om contact 
+                op te nemen met een financieel adviseur.
+            </p>
+            <p>
+                De gegevens in dit rapport zijn gebaseerd op de informatie die je hebt verstrekt
+                en geven een indicatie van mogelijke geschikte beleggingspartners. De uiteindelijke
+                keuze dient te worden gemaakt op basis van een volledig beeld van jouw financiële
+                situatie, doelstellingen en risicobereidheid.
+            </p>
+            <p>© Beleggingspartner Vergelijker, 2025</p>
+        </div>
+    </div>
+</body>
+</html>

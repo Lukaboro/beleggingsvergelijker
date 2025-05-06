@@ -1,39 +1,45 @@
 // frontend/src/components/BankCard.jsx
 
-import React from 'react';
+import React, { useState } from 'react';
 
 const BankCard = ({ bank, onContactRequest, onGuidanceRequest }) => {
+  // State toevoegen om te controleren of de afbeelding geladen is
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
+  // Fallback SVG icoon gebruiken als de afbeelding niet kan worden geladen
+  const renderFallbackIcon = () => (
+    <div className="bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+      <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+    </div>
+  );
+
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden transition duration-300 hover:shadow-lg">
       <div className="p-6">
-        {/* Logo met zeer drastisch gereduceerde afmetingen */}
-        {bank.logo && (
-          <div className="flex justify-center mb-4 h-12">
-            {/* Extreem verkleinde afbeelding met meerdere constraints */}
-            <div 
-              style={{ 
-                width: '32px', 
-                height: '32px', 
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                overflow: 'hidden'
-              }}
-            >
+        {/* Logo met extreme maatregelen */}
+        {bank.logo && !imageError ? (
+          <div className="flex justify-center mb-4">
+            <div className="w-16 h-16 flex items-center justify-center mx-auto overflow-hidden">
               <img 
                 src={`/images/${bank.logo}`} 
                 alt={`${bank.name} logo`} 
                 style={{ 
-                  maxWidth: '100%', 
-                  maxHeight: '100%', 
-                  width: 'auto', 
-                  height: 'auto',
+                  width: '32px', 
+                  height: '32px', 
+                  maxWidth: '32px', 
+                  maxHeight: '32px',
                   objectFit: 'contain'
                 }} 
+                onLoad={() => setImageLoaded(true)}
+                onError={() => setImageError(true)}
               />
             </div>
           </div>
-        )}
+        ) : renderFallbackIcon()}
+        
         <h3 className="text-xl font-bold text-blue-800 mb-3">{bank.name}</h3>
         <p className="text-gray-600 mb-4">{bank.description}</p>
         

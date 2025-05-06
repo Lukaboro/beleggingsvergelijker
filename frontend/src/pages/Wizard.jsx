@@ -65,6 +65,8 @@ const Wizard = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
   
   const handleNext = (answer) => {
     // Update answers
@@ -76,73 +78,128 @@ const Wizard = () => {
       setCurrentStep(currentStep + 1);
     } else {
       // Submit answers
-      console.log("Alle antwoorden:", updatedAnswers);
+      submitAnswers(updatedAnswers);
+    }
+  };
+  
+  const submitAnswers = async (userAnswers) => {
+    console.log("Versturen van antwoorden naar backend:", JSON.stringify(userAnswers));
+    console.log("API URL:", `${API_URL}/match`);
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Echte API aanroep
+      const response = await fetch(`${API_URL}/match`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(userAnswers),
+      });
       
-      // Stuur naar API of gebruik mock data
+      console.log("Response status:", response.status);
+      console.log("Response headers:", Object.fromEntries([...response.headers]));
+      
+      // Lees de ruwe response tekst voor debugging
+      const responseText = await response.text();
+      console.log("Ruwe response:", responseText);
+      
+      // Als het geen geldige JSON is, zal dit een fout geven
+      let data;
       try {
-        // Mock data voor testen
-        const mockMatches = [
-          {
-            id: "bank1",
-            name: "Nova Invest",
-            logo: "nova_invest.svg",
-            description: "Innovatieve online broker gericht op zelfstandige beleggers",
-            strengths: [
-              "Lage kosten en transparante tarieven",
-              "Uitgebreid educatief platform",
-              "Eenvoudige en intuïtieve interface"
-            ],
-            weaknesses: [
-              "Beperkte persoonlijke ondersteuning",
-              "Geen fysieke kantoren"
-            ],
-            matchScore: 85
-          },
-          {
-            id: "bank2",
-            name: "GreenCap",
-            logo: "greencap.svg",
-            description: "Duurzame vermogensbeheerder met focus op impact investing",
-            strengths: [
-              "Specialisatie in duurzame beleggingsstrategieën",
-              "Persoonlijke begeleiding door experts",
-              "Transparante impact rapportage"
-            ],
-            weaknesses: [
-              "Hogere kosten dan pure online aanbieders",
-              "Beperkt aanbod niet-duurzame beleggingen"
-            ],
-            matchScore: 70
-          },
-          {
-            id: "bank3",
-            name: "Fortex",
-            logo: "fortex.svg",
-            description: "Traditionele bank met uitgebreide vermogensplanning en advies",
-            strengths: [
-              "Persoonlijke adviseur en lokale kantoren",
-              "Volledig geïntegreerde bankdiensten",
-              "Focus op veiligheid en stabiliteit"
-            ],
-            weaknesses: [
-              "Hogere kosten voor transacties en beheer",
-              "Minder innovatieve beleggingsopties"
-            ],
-            matchScore: 60
-          }
-        ];
-        
-        // Sla resultaten op in localStorage
-        localStorage.setItem('matchResults', JSON.stringify(mockMatches));
-        localStorage.setItem('userPreferences', JSON.stringify(updatedAnswers));
-        
-        // Navigeer naar resultaten
-        navigate('/results');
-      } catch (error) {
-        console.error("Error:", error);
-        // Fallback navigatie
-        navigate('/results');
+        data = JSON.parse(responseText);
+      } catch (jsonError) {
+        console.error("Error bij het parsen van JSON:", jsonError);
+        throw new Error(`Ongeldige JSON response: ${responseText.substring(0, 100)}...`);
       }
+      
+      console.log("Geparseerde API response data:", data);
+      
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status} - ${data.detail || 'Onbekende fout'}`);
+      }
+      
+      // Controleer of de data de verwachte structuur heeft
+      if (!data.matches || !Array.isArray(data.matches)) {
+        console.error("Onverwacht response formaat:", data);
+        throw new Error("Onverwacht response formaat van API");
+      }
+      
+      // Sla resultaten op in localStorage
+      localStorage.setItem('matchResults', JSON.stringify(data.matches));
+      localStorage.setItem('userPreferences', JSON.stringify(userAnswers));
+      
+      setIsLoading(false);
+      
+      // Navigeer naar resultaten
+      navigate('/results');
+    } catch (error) {
+      console.error("Error bij het versturen van antwoorden:", error);
+      setError(error.message);
+      setIsLoading(false);
+      
+      // Als API aanroep mislukt, gebruik fallback data
+      const mockMatches = [
+        {
+          id: "bank1",
+          name: "Nova Invest",
+          logo: "nova_invest.svg",
+          description: "Innovatieve online broker gericht op zelfstandige beleggers",
+          strengths: [
+            "Lage kosten en transparante tarieven",
+            "Uitgebreid educatief platform",
+            "Eenvoudige en intuïtieve interface"
+          ],
+          weaknesses: [
+            "Beperkte persoonlijke ondersteuning",
+            "Geen fysieke kantoren"
+          ],
+          matchScore: 85
+        },
+        {
+          id: "bank2",
+          name: "GreenCap",
+          logo: "greencap.svg",
+          description: "Duurzame vermogensbeheerder met focus op impact investing",
+          strengths: [
+            "Specialisatie in duurzame beleggingsstrategieën",
+            "Persoonlijke begeleiding door experts",
+            "Transparante impact rapportage"
+          ],
+          weaknesses: [
+            "Hogere kosten dan pure online aanbieders",
+            "Beperkt aanbod niet-duurzame beleggingen"
+          ],
+          matchScore: 70
+        },
+        {
+          id: "bank3",
+          name: "Fortex",
+          logo: "fortex.svg",
+          description: "Traditionele bank met uitgebreide vermogensplanning en advies",
+          strengths: [
+            "Persoonlijke adviseur en lokale kantoren",
+            "Volledig geïntegreerde bankdiensten",
+            "Focus op veiligheid en stabiliteit"
+          ],
+          weaknesses: [
+            "Hogere kosten voor transacties en beheer",
+            "Minder innovatieve beleggingsopties"
+          ],
+          matchScore: 60
+        }
+      ];
+      
+      // Toon alert met foutmelding maar ga wel door
+      alert(`Er was een probleem bij het versturen van je antwoorden: ${error.message}. We gebruiken nu voorbeelddata.`);
+      
+      localStorage.setItem('matchResults', JSON.stringify(mockMatches));
+      localStorage.setItem('userPreferences', JSON.stringify(userAnswers));
+      
+      navigate('/results');
     }
   };
   
@@ -171,13 +228,32 @@ const Wizard = () => {
           </span>
         </div>
 
-        <div className="bg-white rounded-xl shadow-md p-6 mt-4">
-          <QuestionCard
-            key={currentQuestion.id}
-            question={currentQuestion}
-            onAnswer={handleNext}
-          />
-        </div>
+        {isLoading ? (
+          <div className="bg-white rounded-xl shadow-md p-6 mt-4 text-center">
+            <p className="text-gray-600 mb-2">Bezig met verwerken van je antwoorden...</p>
+            <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          </div>
+        ) : error ? (
+          <div className="bg-white rounded-xl shadow-md p-6 mt-4">
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+              <p>{error}</p>
+            </div>
+            <button
+              onClick={() => setError(null)}
+              className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+            >
+              Probeer opnieuw
+            </button>
+          </div>
+        ) : (
+          <div className="bg-white rounded-xl shadow-md p-6 mt-4">
+            <QuestionCard
+              key={currentQuestion.id}
+              question={currentQuestion}
+              onAnswer={handleNext}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

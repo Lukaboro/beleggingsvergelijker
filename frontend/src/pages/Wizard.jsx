@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProgressBar from '../components/ProgressBar';
 import QuestionCard from '../components/QuestionCard';
+import API_URL from '../data/apiConfig'; // Import vanuit data map
 
 const questions = [
   {
@@ -83,57 +84,85 @@ const Wizard = () => {
   
   const submitAnswers = async (userAnswers) => {
     console.log("Versturen van antwoorden naar backend:", userAnswers);
+    console.log("API URL:", API_URL); // Log de API URL voor debug doeleinden
     
     try {
-      // Gebruik mock data voor test deployment
+      // Gebruik de geïmporteerde API URL
+      const response = await fetch(`${API_URL}/match`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userAnswers),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log("API response:", data); // Log de API response
+      
+      // Sla resultaten op in localStorage
+      localStorage.setItem('matchResults', JSON.stringify(data.matches));
+      localStorage.setItem('userPreferences', JSON.stringify(userAnswers));
+      
+      // Navigeer naar resultaten pagina
+      navigate('/results');
+    } catch (error) {
+      console.error('Error submitting answers:', error);
+      
+      // Fallback voor testen: gebruik mock data
+      console.log("Fallback naar mock data voor testen");
+      
       const mockMatches = [
         {
-          id: 1,
-          name: "BeleggenPlus",
-          logo: "bank1.png",
-          description: "Ideaal voor beginners met focus op duurzaamheid",
+          id: "bank1",
+          name: "Nova Invest",
+          logo: "nova_invest.svg",
+          description: "Innovatieve online broker gericht op zelfstandige beleggers",
           strengths: [
-            "Lage minimum inleg (vanaf €100)",
-            "Uitgebreide educatieve content",
-            "Focus op duurzame beleggingen"
+            "Lage kosten en transparante tarieven",
+            "Uitgebreid educatief platform",
+            "Eenvoudige en intuïtieve interface"
           ],
           weaknesses: [
-            "Minder persoonlijke begeleiding",
-            "Beperktere keuze in fondsen"
+            "Beperkte persoonlijke ondersteuning",
+            "Geen fysieke kantoren"
           ],
-          matchScore: 92
+          matchScore: 85
         },
         {
-          id: 2,
-          name: "KapitaalGroei",
-          logo: "bank2.png",
-          description: "Traditionele aanpak met persoonlijk advies",
+          id: "bank2",
+          name: "GreenCap",
+          logo: "greencap.svg",
+          description: "Duurzame vermogensbeheerder met focus op impact investing",
           strengths: [
-            "Ervaren adviseurs beschikbaar",
-            "Volledige portefeuillebeheer mogelijk",
-            "Bewezen langetermijnresultaten"
+            "Specialisatie in duurzame beleggingsstrategieën",
+            "Persoonlijke begeleiding door experts",
+            "Transparante impact rapportage"
           ],
           weaknesses: [
-            "Hogere beheerkosten",
-            "Minimum inleg van €10.000"
+            "Hogere kosten dan pure online aanbieders",
+            "Beperkt aanbod niet-duurzame beleggingen"
           ],
-          matchScore: 78
+          matchScore: 70
         },
         {
-          id: 3,
-          name: "InvestNext",
-          logo: "bank3.png",
-          description: "Innovatief platform met lage kosten",
+          id: "bank3",
+          name: "Fortex",
+          logo: "fortex.svg",
+          description: "Traditionele bank met uitgebreide vermogensplanning en advies",
           strengths: [
-            "Zeer lage beheerskosten",
-            "Geavanceerde mobiele app",
-            "Automatisch herbalanceren"
+            "Persoonlijke adviseur en lokale kantoren",
+            "Volledig geïntegreerde bankdiensten",
+            "Focus op veiligheid en stabiliteit"
           ],
           weaknesses: [
-            "Geen persoonlijk advies",
-            "Nieuwere speler op de markt"
+            "Hogere kosten voor transacties en beheer",
+            "Minder innovatieve beleggingsopties"
           ],
-          matchScore: 67
+          matchScore: 60
         }
       ];
       
@@ -143,10 +172,6 @@ const Wizard = () => {
       
       // Navigeer naar resultaten pagina
       navigate('/results');
-    } catch (error) {
-      console.error('Error submitting answers:', error);
-      // Toon foutmelding
-      alert("Er is een fout opgetreden bij het verwerken van je antwoorden. Probeer het later opnieuw.");
     }
   };
   

@@ -21,23 +21,15 @@ const BankCard = ({ bank, onContactRequest, onGuidanceRequest }) => {
       <div className="p-6">
         {/* Logo met extreme maatregelen */}
         {bank.logo && !imageError ? (
-          <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 flex items-center justify-center mx-auto overflow-hidden">
-              <img 
-                src={`/images/${bank.logo}`} 
-                alt={`${bank.name} logo`} 
-                style={{ 
-                  width: '32px', 
-                  height: '32px', 
-                  maxWidth: '32px', 
-                  maxHeight: '32px',
-                  objectFit: 'contain'
-                }} 
-                onLoad={() => setImageLoaded(true)}
-                onError={() => setImageError(true)}
-              />
-            </div>
-          </div>
+         <div className="flex justify-center mb-4">
+          <img
+           src={`/images/${bank.logo}`}
+            alt={`${bank.name} logo`}
+            className="max-w-[64px] max-h-[64px] w-auto h-auto object-contain"
+           onLoad={() => setImageLoaded(true)}
+           onError={() => setImageError(true)}
+         />
+        </div>
         ) : renderFallbackIcon()}
         
         <h3 className="text-xl font-bold text-blue-800 mb-3">{bank.name}</h3>

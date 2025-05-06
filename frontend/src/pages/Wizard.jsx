@@ -65,38 +65,88 @@ const Wizard = () => {
   const [answers, setAnswers] = useState({});
   
   const handleNext = (answer) => {
+    console.log("Wizard handleNext opgeroepen met:", answer, "voor vraag:", questions[currentStep].id);
+    
+    // Zorg ervoor dat het antwoord wordt opgeslagen in de staat
     const updatedAnswers = { ...answers, [questions[currentStep].id]: answer };
     setAnswers(updatedAnswers);
     
     if (currentStep < questions.length - 1) {
+      // Ga naar de volgende vraag
       setCurrentStep(currentStep + 1);
     } else {
-      // Submit answers to backend and navigate to results
+      // Dit is de laatste vraag, verstuur antwoorden naar backend
+      console.log("Alle vragen beantwoord, verstuur antwoorden:", updatedAnswers);
       submitAnswers(updatedAnswers);
     }
   };
   
   const submitAnswers = async (userAnswers) => {
+    console.log("Versturen van antwoorden naar backend:", userAnswers);
+    
     try {
-      const response = await fetch('http://localhost:8000/api/match', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      // Gebruik mock data voor test deployment
+      const mockMatches = [
+        {
+          id: 1,
+          name: "BeleggenPlus",
+          logo: "bank1.png",
+          description: "Ideaal voor beginners met focus op duurzaamheid",
+          strengths: [
+            "Lage minimum inleg (vanaf €100)",
+            "Uitgebreide educatieve content",
+            "Focus op duurzame beleggingen"
+          ],
+          weaknesses: [
+            "Minder persoonlijke begeleiding",
+            "Beperktere keuze in fondsen"
+          ],
+          matchScore: 92
         },
-        body: JSON.stringify(userAnswers),
-      });
+        {
+          id: 2,
+          name: "KapitaalGroei",
+          logo: "bank2.png",
+          description: "Traditionele aanpak met persoonlijk advies",
+          strengths: [
+            "Ervaren adviseurs beschikbaar",
+            "Volledige portefeuillebeheer mogelijk",
+            "Bewezen langetermijnresultaten"
+          ],
+          weaknesses: [
+            "Hogere beheerkosten",
+            "Minimum inleg van €10.000"
+          ],
+          matchScore: 78
+        },
+        {
+          id: 3,
+          name: "InvestNext",
+          logo: "bank3.png",
+          description: "Innovatief platform met lage kosten",
+          strengths: [
+            "Zeer lage beheerskosten",
+            "Geavanceerde mobiele app",
+            "Automatisch herbalanceren"
+          ],
+          weaknesses: [
+            "Geen persoonlijk advies",
+            "Nieuwere speler op de markt"
+          ],
+          matchScore: 67
+        }
+      ];
       
-      const data = await response.json();
-      
-      // Store results in localStorage for access on results page
-      localStorage.setItem('matchResults', JSON.stringify(data.matches));
+      // Sla mock resultaten op in localStorage
+      localStorage.setItem('matchResults', JSON.stringify(mockMatches));
       localStorage.setItem('userPreferences', JSON.stringify(userAnswers));
       
-      // Navigate to results page
+      // Navigeer naar resultaten pagina
       navigate('/results');
     } catch (error) {
       console.error('Error submitting answers:', error);
-      // Handle error (show error message)
+      // Toon foutmelding
+      alert("Er is een fout opgetreden bij het verwerken van je antwoorden. Probeer het later opnieuw.");
     }
   };
   
@@ -114,6 +164,7 @@ const Wizard = () => {
       </div>
       
       <QuestionCard
+        key={currentQuestion.id} // Voeg key toe om re-render te forceren bij vraagwijziging
         question={currentQuestion}
         onAnswer={handleNext}
       />

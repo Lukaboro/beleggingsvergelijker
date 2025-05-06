@@ -1,0 +1,67 @@
+/* frontend/src/assets/styles/global.css */
+
+/* Globale reset voor alle afbeeldingen en SVG's */
+img, svg {
+    max-width: 100% !important;
+    max-height: 100% !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain !important;
+  }
+  
+  /* Specifieke controle voor SVG iconen in de app */
+  .icon-container {
+    width: 24px !important;
+    height: 24px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+  }
+  
+  .icon-container svg,
+  .icon-container img {
+    width: 16px !important;
+    height: 16px !important;
+    flex-shrink: 0 !important;
+  }
+  
+  /* Specifieke controle voor bank logo's en andere grote iconen */
+  .logo-container {
+    width: 48px !important;
+    height: 48px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+  }
+  
+  .logo-container svg,
+  .logo-container img {
+    width: 32px !important;
+    height: 32px !important;
+    flex-shrink: 0 !important;
+  }
+  
+  /* Forceer elementen om hun ouder-container te respecteren */
+  .overflow-hidden {
+    overflow: hidden !important;
+  }
+  
+  /* Extra controle voor alle container divs met iconen */
+  div[class*="rounded-full"] {
+    max-width: 48px !important;
+    max-height: 48px !important;
+  }
+  
+  /* Override voor specifieke svg elementen in de IntroPage */
+  .container svg {
+    max-width: 24px !important;
+    max-height: 24px !important;
+  }
+  
+  /* Extra sterke override voor extreme gevallen */
+  div svg, div img {
+    max-width: 32px !important;
+    max-height: 32px !important;
+  }

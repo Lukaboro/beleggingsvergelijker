@@ -9,6 +9,7 @@ import Report from './pages/Report';
 import About from './pages/About';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import './assets/styles/global.css'; // Import van de globale CSS fix
 
 function App() {
   return (

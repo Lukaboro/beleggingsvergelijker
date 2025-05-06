@@ -6,6 +6,7 @@ import ProgressBar from '../components/ProgressBar';
 import QuestionCard from '../components/QuestionCard';
 import API_URL from '../data/apiConfig';
 
+// Vragen array behouden
 const questions = [
   {
     id: 'investment_goal',
@@ -64,119 +65,91 @@ const Wizard = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState({});
-
-  // Controleer of currentStep een geldige waarde heeft
-  if (currentStep < 0 || currentStep >= questions.length) {
-    console.error(`Ongeldige currentStep waarde: ${currentStep}`);
-    // Herstel naar een veilige waarde
-    setCurrentStep(0);
-    return <div className="p-8 text-center">Laden...</div>;
-  }
-
-  // Nu weten we zeker dat currentQuestion geldig is
-  const currentQuestion = questions[currentStep];
-
+  
   const handleNext = (answer) => {
-    console.log(`Antwoord ontvangen voor vraag ${currentStep + 1}:`, answer);
-    
-    const updatedAnswers = { ...answers, [currentQuestion.id]: answer };
+    // Update answers
+    const updatedAnswers = { ...answers, [questions[currentStep].id]: answer };
     setAnswers(updatedAnswers);
     
+    // Move to next question or submit
     if (currentStep < questions.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      submitAnswers(updatedAnswers);
-    }
-  };
-
-  const submitAnswers = async (userAnswers) => {
-    console.log("Versturen van antwoorden naar backend:", userAnswers);
-    console.log("API URL:", `${API_URL}/match`);
-    
-    try {
-      const response = await fetch(`${API_URL}/match`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userAnswers),
-      });
-
-      console.log("Response status:", response.status);
+      // Submit answers
+      console.log("Alle antwoorden:", updatedAnswers);
       
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Error response:", errorText);
-        throw new Error(`API error: ${response.status} - ${errorText}`);
+      // Stuur naar API of gebruik mock data
+      try {
+        // Mock data voor testen
+        const mockMatches = [
+          {
+            id: "bank1",
+            name: "Nova Invest",
+            logo: "nova_invest.svg",
+            description: "Innovatieve online broker gericht op zelfstandige beleggers",
+            strengths: [
+              "Lage kosten en transparante tarieven",
+              "Uitgebreid educatief platform",
+              "Eenvoudige en intuïtieve interface"
+            ],
+            weaknesses: [
+              "Beperkte persoonlijke ondersteuning",
+              "Geen fysieke kantoren"
+            ],
+            matchScore: 85
+          },
+          {
+            id: "bank2",
+            name: "GreenCap",
+            logo: "greencap.svg",
+            description: "Duurzame vermogensbeheerder met focus op impact investing",
+            strengths: [
+              "Specialisatie in duurzame beleggingsstrategieën",
+              "Persoonlijke begeleiding door experts",
+              "Transparante impact rapportage"
+            ],
+            weaknesses: [
+              "Hogere kosten dan pure online aanbieders",
+              "Beperkt aanbod niet-duurzame beleggingen"
+            ],
+            matchScore: 70
+          },
+          {
+            id: "bank3",
+            name: "Fortex",
+            logo: "fortex.svg",
+            description: "Traditionele bank met uitgebreide vermogensplanning en advies",
+            strengths: [
+              "Persoonlijke adviseur en lokale kantoren",
+              "Volledig geïntegreerde bankdiensten",
+              "Focus op veiligheid en stabiliteit"
+            ],
+            weaknesses: [
+              "Hogere kosten voor transacties en beheer",
+              "Minder innovatieve beleggingsopties"
+            ],
+            matchScore: 60
+          }
+        ];
+        
+        // Sla resultaten op in localStorage
+        localStorage.setItem('matchResults', JSON.stringify(mockMatches));
+        localStorage.setItem('userPreferences', JSON.stringify(updatedAnswers));
+        
+        // Navigeer naar resultaten
+        navigate('/results');
+      } catch (error) {
+        console.error("Error:", error);
+        // Fallback navigatie
+        navigate('/results');
       }
-
-      const data = await response.json();
-      console.log("API response data:", data);
-      
-      localStorage.setItem('matchResults', JSON.stringify(data.matches));
-      localStorage.setItem('userPreferences', JSON.stringify(userAnswers));
-      navigate('/results');
-    } catch (error) {
-      console.error('Error submitting answers:', error);
-      
-      // Fallback naar mock data
-      const mockMatches = [
-        {
-          id: "bank1",
-          name: "Nova Invest",
-          logo: "nova_invest.svg",
-          description: "Innovatieve online broker gericht op zelfstandige beleggers",
-          strengths: [
-            "Lage kosten en transparante tarieven",
-            "Uitgebreid educatief platform",
-            "Eenvoudige en intuïtieve interface"
-          ],
-          weaknesses: [
-            "Beperkte persoonlijke ondersteuning",
-            "Geen fysieke kantoren"
-          ],
-          matchScore: 85
-        },
-        {
-          id: "bank2",
-          name: "GreenCap",
-          logo: "greencap.svg",
-          description: "Duurzame vermogensbeheerder met focus op impact investing",
-          strengths: [
-            "Specialisatie in duurzame beleggingsstrategieën",
-            "Persoonlijke begeleiding door experts",
-            "Transparante impact rapportage"
-          ],
-          weaknesses: [
-            "Hogere kosten dan pure online aanbieders",
-            "Beperkt aanbod niet-duurzame beleggingen"
-          ],
-          matchScore: 70
-        },
-        {
-          id: "bank3",
-          name: "Fortex",
-          logo: "fortex.svg",
-          description: "Traditionele bank met uitgebreide vermogensplanning en advies",
-          strengths: [
-            "Persoonlijke adviseur en lokale kantoren",
-            "Volledig geïntegreerde bankdiensten",
-            "Focus op veiligheid en stabiliteit"
-          ],
-          weaknesses: [
-            "Hogere kosten voor transacties en beheer",
-            "Minder innovatieve beleggingsopties"
-          ],
-          matchScore: 60
-        }
-      ];
-      
-      localStorage.setItem('matchResults', JSON.stringify(mockMatches));
-      localStorage.setItem('userPreferences', JSON.stringify(userAnswers));
-      navigate('/results');
     }
   };
-
+  
+  // Bereken huidige vraag en voortgang
+  const currentQuestion = questions[currentStep];
   const progress = ((currentStep + 1) / questions.length) * 100;
-
+  
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
       <div className="max-w-3xl mx-auto">

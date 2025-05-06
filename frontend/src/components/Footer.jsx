@@ -12,7 +12,7 @@ const Footer = () => {
         <div className="flex flex-col md:flex-row justify-between">
           <div className="mb-8 md:mb-0">
             <Link to="/" className="text-xl font-bold text-blue-800">
-              BeleggingsMatch
+              BeleggingsTinder
             </Link>
             <p className="text-gray-600 mt-2 max-w-md">
               Vind de beleggingspartner die écht bij jou past, gebaseerd op jouw persoonlijke voorkeuren en doelstellingen.
@@ -60,7 +60,7 @@ const Footer = () => {
         </div>
         
         <div className="border-t border-gray-200 mt-8 pt-6 text-center text-gray-500 text-sm">
-          <p>&copy; {currentYear} BeleggingsMatch. Alle rechten voorbehouden.</p>
+          <p>&copy; {currentYear} BeleggingsTinder. Alle rechten voorbehouden.</p>
           <p className="mt-1">
             Dit is een prototype voor demonstratiedoeleinden. Geen financieel advies.
           </p>

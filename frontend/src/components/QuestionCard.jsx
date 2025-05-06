@@ -1,8 +1,9 @@
-// frontend/src/components/QuestionCard.jsx
+// frontend/src/components/QuestionCard.jsx - complete herziening van de slider logica
 
 import React, { useState } from 'react';
 
 const QuestionCard = ({ question, onAnswer }) => {
+  // Initialiseer de selectedValue op basis van het type vraag
   const [selectedValue, setSelectedValue] = useState(
     question.type === 'slider' ? question.defaultValue : ''
   );
@@ -13,11 +14,23 @@ const QuestionCard = ({ question, onAnswer }) => {
   };
   
   const handleSliderChange = (e) => {
-    setSelectedValue(parseInt(e.target.value, 10));
+    const value = parseInt(e.target.value, 10);
+    setSelectedValue(value);
+    // Alleen log voor debugging
+    console.log("Slider waarde gewijzigd naar:", value);
   };
   
-  const handleSliderSubmit = () => {
-    onAnswer(selectedValue);
+  const handleSliderSubmit = (e) => {
+    e.preventDefault(); // Voorkom standaard formulier gedrag
+    console.log("Submit knop geklikt met waarde:", selectedValue);
+    
+    // Zorg ervoor dat we een geldige numerieke waarde doorgeven
+    const valueToSubmit = selectedValue !== undefined && selectedValue !== null 
+      ? parseInt(selectedValue, 10) 
+      : parseInt(question.defaultValue, 10);
+    
+    console.log("Waarde die wordt doorgegeven:", valueToSubmit);
+    onAnswer(valueToSubmit);
   };
   
   return (
@@ -26,7 +39,7 @@ const QuestionCard = ({ question, onAnswer }) => {
       <p className="text-gray-600 mb-6">{question.description}</p>
       
       {question.type === 'slider' ? (
-        <div className="mb-8">
+        <form onSubmit={handleSliderSubmit} className="mb-8">
           <div className="mb-6">
             <input
               type="range"
@@ -50,12 +63,12 @@ const QuestionCard = ({ question, onAnswer }) => {
           </div>
           
           <button
-            onClick={handleSliderSubmit}
+            type="submit"
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300"
           >
             Volgende
           </button>
-        </div>
+        </form>
       ) : (
         <div className="space-y-3">
           {question.options.map((option) => (

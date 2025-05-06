@@ -6,6 +6,34 @@ const BankCard = ({ bank, onContactRequest, onGuidanceRequest }) => {
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden transition duration-300 hover:shadow-lg">
       <div className="p-6">
+        {/* Logo met zeer drastisch gereduceerde afmetingen */}
+        {bank.logo && (
+          <div className="flex justify-center mb-4 h-12">
+            {/* Extreem verkleinde afbeelding met meerdere constraints */}
+            <div 
+              style={{ 
+                width: '32px', 
+                height: '32px', 
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'hidden'
+              }}
+            >
+              <img 
+                src={`/images/${bank.logo}`} 
+                alt={`${bank.name} logo`} 
+                style={{ 
+                  maxWidth: '100%', 
+                  maxHeight: '100%', 
+                  width: 'auto', 
+                  height: 'auto',
+                  objectFit: 'contain'
+                }} 
+              />
+            </div>
+          </div>
+        )}
         <h3 className="text-xl font-bold text-blue-800 mb-3">{bank.name}</h3>
         <p className="text-gray-600 mb-4">{bank.description}</p>
         

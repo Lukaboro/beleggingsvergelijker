@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProgressBar from '../components/ProgressBar';
 import QuestionCard from '../components/QuestionCard';
-import API_URL from '../data/apiConfig'; // Import vanuit data map
+import API_URL from '../data/apiConfig';
 
 const questions = [
   {
@@ -64,57 +64,60 @@ const Wizard = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState({});
-  
+
+  // Controleer of currentStep een geldige waarde heeft
+  if (currentStep < 0 || currentStep >= questions.length) {
+    console.error(`Ongeldige currentStep waarde: ${currentStep}`);
+    // Herstel naar een veilige waarde
+    setCurrentStep(0);
+    return <div className="p-8 text-center">Laden...</div>;
+  }
+
+  // Nu weten we zeker dat currentQuestion geldig is
+  const currentQuestion = questions[currentStep];
+
   const handleNext = (answer) => {
-    console.log("Wizard handleNext opgeroepen met:", answer, "voor vraag:", questions[currentStep].id);
+    console.log(`Antwoord ontvangen voor vraag ${currentStep + 1}:`, answer);
     
-    // Zorg ervoor dat het antwoord wordt opgeslagen in de staat
-    const updatedAnswers = { ...answers, [questions[currentStep].id]: answer };
+    const updatedAnswers = { ...answers, [currentQuestion.id]: answer };
     setAnswers(updatedAnswers);
     
     if (currentStep < questions.length - 1) {
-      // Ga naar de volgende vraag
       setCurrentStep(currentStep + 1);
     } else {
-      // Dit is de laatste vraag, verstuur antwoorden naar backend
-      console.log("Alle vragen beantwoord, verstuur antwoorden:", updatedAnswers);
       submitAnswers(updatedAnswers);
     }
   };
-  
+
   const submitAnswers = async (userAnswers) => {
     console.log("Versturen van antwoorden naar backend:", userAnswers);
-    console.log("API URL:", API_URL); // Log de API URL voor debug doeleinden
+    console.log("API URL:", `${API_URL}/match`);
     
     try {
-      // Gebruik de geïmporteerde API URL
       const response = await fetch(`${API_URL}/match`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userAnswers),
       });
+
+      console.log("Response status:", response.status);
       
       if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
+        const errorText = await response.text();
+        console.error("Error response:", errorText);
+        throw new Error(`API error: ${response.status} - ${errorText}`);
       }
-      
+
       const data = await response.json();
-      console.log("API response:", data); // Log de API response
+      console.log("API response data:", data);
       
-      // Sla resultaten op in localStorage
       localStorage.setItem('matchResults', JSON.stringify(data.matches));
       localStorage.setItem('userPreferences', JSON.stringify(userAnswers));
-      
-      // Navigeer naar resultaten pagina
       navigate('/results');
     } catch (error) {
       console.error('Error submitting answers:', error);
       
-      // Fallback voor testen: gebruik mock data
-      console.log("Fallback naar mock data voor testen");
-      
+      // Fallback naar mock data
       const mockMatches = [
         {
           id: "bank1",
@@ -166,33 +169,43 @@ const Wizard = () => {
         }
       ];
       
-      // Sla mock resultaten op in localStorage
       localStorage.setItem('matchResults', JSON.stringify(mockMatches));
       localStorage.setItem('userPreferences', JSON.stringify(userAnswers));
-      
-      // Navigeer naar resultaten pagina
       navigate('/results');
     }
   };
-  
-  const currentQuestion = questions[currentStep];
+
   const progress = ((currentStep + 1) / questions.length) * 100;
-  
+
   return (
-    <div className="container mx-auto px-4 py-8 max-w-2xl">
-      <ProgressBar progress={progress} />
-      
-      <div className="mt-6 text-center">
-        <span className="text-sm font-medium text-gray-500">
-          Vraag {currentStep + 1} van {questions.length}
-        </span>
+    <div className="min-h-screen bg-gray-50 py-12 px-4">
+      <div className="max-w-3xl mx-auto">
+        {/* Titel boven de progress bar */}
+        <div className="text-center mb-6">
+          <h1 className="text-3xl md:text-4xl font-extrabold text-blue-800 mb-2">
+            Jouw persoonlijke beleggingsprofiel
+          </h1>
+          <p className="text-gray-600">
+            Beantwoord een paar korte vragen. We vinden de partner die bij je past.
+          </p>
+        </div>
+
+        <ProgressBar progress={progress} />
+
+        <div className="text-center mt-6 mb-2">
+          <span className="text-sm font-medium text-gray-500">
+            Vraag {currentStep + 1} van {questions.length}
+          </span>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-md p-6 mt-4">
+          <QuestionCard
+            key={currentQuestion.id}
+            question={currentQuestion}
+            onAnswer={handleNext}
+          />
+        </div>
       </div>
-      
-      <QuestionCard
-        key={currentQuestion.id} // Voeg key toe om re-render te forceren bij vraagwijziging
-        question={currentQuestion}
-        onAnswer={handleNext}
-      />
     </div>
   );
 };

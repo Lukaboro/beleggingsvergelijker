@@ -70,7 +70,7 @@ BANK_DATA = [
         },
         "recommendation_points": {
             "investment_goal": {
-                "groei": 8,
+                "groei": 0,
                 "pensioen": 9,
                 "kapitaalbehoud": 6,
                 "inkomen": 5
@@ -115,7 +115,7 @@ BANK_DATA = [
         },
         "recommendation_points": {
             "investment_goal": {
-                "groei": 4,
+                "groei": 0,
                 "pensioen": 10,
                 "kapitaalbehoud": 10,
                 "inkomen": 8

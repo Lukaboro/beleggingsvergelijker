@@ -8,10 +8,15 @@ from typing import Dict, List, Any
 
 def generate_report(preferences: Dict[str, Any], matches: List[Dict]) -> str:
     """
-    Generate a dummy PDF report based on user preferences and matched banks
+    Generate a report based on user preferences and matched banks
     """
+    # Huidige directory van het script
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    # Ga twee niveaus omhoog (van /app/utils naar /) en dan naar /app/templates
+    template_dir = os.path.join(os.path.dirname(os.path.dirname(current_dir)), "app", "templates")
+
     # Setup Jinja2 environment
-    env = Environment(loader=FileSystemLoader("app/templates"))
+    env = Environment(loader=FileSystemLoader(template_dir))
     template = env.get_template("report_template.html")
     
     # Prepare data for template
@@ -61,12 +66,13 @@ def generate_report(preferences: Dict[str, Any], matches: List[Dict]) -> str:
     # Create output directory if it doesn't exist
     os.makedirs("reports", exist_ok=True)
     
-    # Generate unique filename
-    filename = f"beleggingsadvies_{datetime.now().strftime('%Y%m%d%H%M%S')}.pdf"
+    # Generate unique filename - gebruik .html in plaats van .pdf
+    filename = f"beleggingsadvies_{datetime.now().strftime('%Y%m%d%H%M%S')}.html"
     output_path = f"reports/{filename}"
     
-    # Generate PDF from HTML
-    pdfkit.from_string(html_content, output_path)
+    # Write HTML directly to file in plaats van PDF genereren
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write(html_content)
     
     # Return URL to download the report
     return f"/api/reports/{filename}"

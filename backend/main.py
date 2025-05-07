@@ -1,14 +1,15 @@
 # backend/main.py
 
-from fastapi import FastAPI, BackgroundTasks
+from fastapi import FastAPI, BackgroundTasks, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import List, Optional
 import csv
+import os
 from datetime import datetime
 from app.utils.matcher import calculate_bank_scores
 from app.utils.pdf_generator import generate_report
-from fastapi import FastAPI, BackgroundTasks, Request
 
 app = FastAPI(title="Beleggingspartner Vergelijker API")
 
@@ -20,6 +21,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Zorg ervoor dat de reports directory bestaat
+os.makedirs("reports", exist_ok=True)
+
+# Mount de reports directory als statische bestanden
+app.mount("/api/reports", StaticFiles(directory="reports"), name="reports")
 
 @app.get("/")
 async def root():

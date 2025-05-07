@@ -20,6 +20,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+async def root():
+    return {"message": "Welcome to Beleggingspartner Vergelijker API"}
+
 class UserPreferences(BaseModel):
     investment_goal: str
     investment_horizon: str

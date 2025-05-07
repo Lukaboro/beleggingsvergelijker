@@ -30,8 +30,13 @@ const Report = () => {
           body: JSON.stringify(userPreferences),
         });
         
+        // Wanneer je de reportUrl instelt
         const data = await response.json();
-        setReportUrl(data.report_url);
+        // Controleer of de URL al absoluut is (begint met http)
+        const fullReportUrl = data.report_url.startsWith('http') 
+          ? data.report_url 
+          : `${API_BASE_URL}${data.report_url}`;
+        setReportUrl(fullReportUrl);
         setIsLoading(false);
       } catch (error) {
         console.error('Error generating report:', error);

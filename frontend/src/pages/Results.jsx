@@ -2,10 +2,16 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import API_URL from '../data/apiConfig'; // Importeer je API config
 
 const ResultsPage = () => {
   const [matches, setMatches] = useState([]);
   const [selectedBank, setSelectedBank] = useState(null);
+  // Nieuwe state variabelen
+  const [userEmail, setUserEmail] = useState('');
+  const [showEmailForm, setShowEmailForm] = useState(false);
+  const [contactType, setContactType] = useState('');
+  const [selectedBankId, setSelectedBankId] = useState(null);
 
   useEffect(() => {
     const storedMatches = localStorage.getItem('matchResults');
@@ -15,15 +21,56 @@ const ResultsPage = () => {
   }, []);
 
   const handleContactRequest = (bankId) => {
+    setSelectedBankId(bankId);
+    setContactType('contact');
+    setShowEmailForm(true);
     const bank = matches.find(b => b.id === bankId);
     setSelectedBank(bank);
-    alert(`Contactaanvraag voor ${bank.name}`);
   };
 
   const handleGuidanceRequest = (bankId) => {
+    setSelectedBankId(bankId);
+    setContactType('guidance');
+    setShowEmailForm(true);
     const bank = matches.find(b => b.id === bankId);
     setSelectedBank(bank);
-    alert(`Begeleiding aangevraagd voor ${bank.name}`);
+  };
+  
+  const submitLeadInfo = async () => {
+    if (!userEmail) {
+      alert('Vul alstublieft een e-mailadres in');
+      return;
+    }
+    
+    const bank = matches.find(b => b.id === selectedBankId);
+    const userPreferences = JSON.parse(localStorage.getItem('userPreferences')) || {};
+    
+    try {
+      const response = await fetch(`${API_URL}/submit-lead`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: userEmail,
+          name: '', // Optioneel, kan je later uitbreiden
+          interest_in_guidance: contactType === 'guidance',
+          preferences: userPreferences
+        }),
+      });
+      
+      const data = await response.json();
+      if (data.status === 'success') {
+        alert(`Bedankt! Je verzoek voor ${contactType === 'guidance' ? 'begeleiding' : 'contact'} bij ${bank.name} is ontvangen.`);
+        setShowEmailForm(false);
+        setUserEmail('');
+      } else {
+        alert('Er is iets misgegaan. Probeer het later opnieuw.');
+      }
+    } catch (error) {
+      console.error('Error submitting lead:', error);
+      alert('Er is iets misgegaan. Probeer het later opnieuw.');
+    }
   };
 
   return (
@@ -120,6 +167,42 @@ const ResultsPage = () => {
           Opnieuw beginnen
         </Link>
       </div>
+      
+      {/* Email formulier popup */}
+      {showEmailForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
+            <h3 className="text-xl font-bold mb-4">
+              {contactType === 'guidance' ? 'Vraag begeleiding aan' : 'Neem contact op'}
+            </h3>
+            <p className="mb-4">
+              Laat je e-mailadres achter en we nemen zo snel mogelijk contact met je op.
+            </p>
+            <input
+              type="email"
+              value={userEmail}
+              onChange={(e) => setUserEmail(e.target.value)}
+              placeholder="Je e-mailadres"
+              className="w-full p-2 border border-gray-300 rounded mb-4"
+              required
+            />
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setShowEmailForm(false)}
+                className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-100"
+              >
+                Annuleren
+              </button>
+              <button
+                onClick={submitLeadInfo}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded"
+              >
+                Versturen
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

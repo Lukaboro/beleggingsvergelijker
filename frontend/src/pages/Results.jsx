@@ -20,20 +20,44 @@ const ResultsPage = () => {
     }
   }, []);
 
-  const handleContactRequest = (bankId) => {
+  const handleContactRequest = (event, bankId) => {
+    // Voorkom event bubbeling
+    event.preventDefault();
+    event.stopPropagation();
+    
+    const bank = matches.find(b => b.id === bankId);
+    console.log("Contact aangevraagd voor:", bank.name);
+    console.log("showEmailForm vóór update:", showEmailForm);
+    
     setSelectedBankId(bankId);
     setContactType('contact');
-    setShowEmailForm(true);
-    const bank = matches.find(b => b.id === bankId);
     setSelectedBank(bank);
+    setShowEmailForm(true);
+    
+    // Direct controleren of de state is bijgewerkt
+    setTimeout(() => {
+      console.log("showEmailForm na update:", showEmailForm);
+    }, 0);
   };
 
-  const handleGuidanceRequest = (bankId) => {
+  const handleGuidanceRequest = (event, bankId) => {
+    // Voorkom event bubbeling
+    event.preventDefault();
+    event.stopPropagation();
+    
+    const bank = matches.find(b => b.id === bankId);
+    console.log("Begeleiding aangevraagd voor:", bank.name);
+    console.log("showEmailForm vóór update:", showEmailForm);
+    
     setSelectedBankId(bankId);
     setContactType('guidance');
-    setShowEmailForm(true);
-    const bank = matches.find(b => b.id === bankId);
     setSelectedBank(bank);
+    setShowEmailForm(true);
+    
+    // Direct controleren of de state is bijgewerkt
+    setTimeout(() => {
+      console.log("showEmailForm na update:", showEmailForm);
+    }, 0);
   };
   
   const submitLeadInfo = async () => {
@@ -46,6 +70,14 @@ const ResultsPage = () => {
     const userPreferences = JSON.parse(localStorage.getItem('userPreferences')) || {};
     
     try {
+      console.log("API call naar:", `${API_URL}/submit-lead`);
+      console.log("Met data:", {
+        email: userEmail,
+        name: '',
+        interest_in_guidance: contactType === 'guidance',
+        preferences: userPreferences
+      });
+      
       const response = await fetch(`${API_URL}/submit-lead`, {
         method: 'POST',
         headers: {
@@ -60,6 +92,8 @@ const ResultsPage = () => {
       });
       
       const data = await response.json();
+      console.log("API response:", data);
+      
       if (data.status === 'success') {
         alert(`Bedankt! Je verzoek voor ${contactType === 'guidance' ? 'begeleiding' : 'contact'} bij ${bank.name} is ontvangen.`);
         setShowEmailForm(false);
@@ -69,12 +103,26 @@ const ResultsPage = () => {
       }
     } catch (error) {
       console.error('Error submitting lead:', error);
-      alert('Er is iets misgegaan. Probeer het later opnieuw.');
+      alert(`Er is iets misgegaan: ${error.message}`);
     }
+  };
+
+  // Test functie voor de popup
+  const handleTestPopup = () => {
+    setShowEmailForm(true);
+    console.log("Test popup geactiveerd");
   };
 
   return (
     <div className="bg-gray-50 min-h-screen py-16 px-4">
+      {/* Test knop voor de popup */}
+      <button 
+        onClick={handleTestPopup}
+        className="fixed top-4 right-4 bg-red-500 text-white p-2 rounded z-50"
+      >
+        Test Popup
+      </button>
+      
       <div className="max-w-5xl mx-auto text-center mb-14">
         <h1 className="text-4xl md:text-5xl font-extrabold text-blue-800 mb-4">
           Jouw top 3 beleggingspartners
@@ -137,13 +185,13 @@ const ResultsPage = () => {
 
             <div className="px-6 pb-6 space-y-2">
               <button
-                onClick={() => handleContactRequest(bank.id)}
+                onClick={(e) => handleContactRequest(e, bank.id)}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition"
               >
                 Ik neem contact op
               </button>
               <button
-                onClick={() => handleGuidanceRequest(bank.id)}
+                onClick={(e) => handleGuidanceRequest(e, bank.id)}
                 className="w-full border border-blue-600 text-blue-600 hover:bg-blue-50 font-semibold py-2 px-4 rounded-lg transition"
               >
                 Ik wens begeleiding
@@ -166,11 +214,18 @@ const ResultsPage = () => {
         >
           Opnieuw beginnen
         </Link>
+        {/* Nieuwe rapportknop */}
+        <Link
+          to="/report"
+          className="py-3 px-6 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition ml-2"
+        >
+          Rapport genereren
+        </Link>
       </div>
       
-      {/* Email formulier popup */}
+      {/* Email formulier popup met verhoogde z-index */}
       {showEmailForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
           <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
             <h3 className="text-xl font-bold mb-4">
               {contactType === 'guidance' ? 'Vraag begeleiding aan' : 'Neem contact op'}

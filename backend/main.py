@@ -8,6 +8,7 @@ import csv
 from datetime import datetime
 from app.utils.matcher import calculate_bank_scores
 from app.utils.pdf_generator import generate_report
+from fastapi import FastAPI, BackgroundTasks, Request
 
 app = FastAPI(title="Beleggingspartner Vergelijker API")
 
@@ -46,12 +47,17 @@ async def match_banks(preferences: UserPreferences):
     return {"matches": matches}
 
 @app.post("/api/generate-report")
-async def create_report(preferences: UserPreferences):
+async def create_report(preferences: UserPreferences, request: Request):
     """
     Generate a dummy report based on user preferences
     """
     matches = calculate_bank_scores(preferences.dict())
-    report_url = generate_report(preferences.dict(), matches)
+    report_path = generate_report(preferences.dict(), matches)
+    
+    # Genereer volledige URL
+    base_url = str(request.base_url).rstrip('/')  # e.g. http://localhost:8000 of https://beleggingsvergelijker.onrender.com
+    report_url = f"{base_url}{report_path}"
+    
     return {"report_url": report_url}
 
 def save_lead_to_csv(lead: LeadInfo):

@@ -20,50 +20,31 @@ const ResultsPage = () => {
     }
   }, []);
 
-  const handleContactRequest = (event, bankId) => {
-    // Voorkom event bubbeling
-    event.preventDefault();
-    event.stopPropagation();
-    
-    const bank = matches.find(b => b.id === bankId);
-    console.log("Contact aangevraagd voor:", bank.name);
-    console.log("showEmailForm vóór update:", showEmailForm);
-    
-    setSelectedBankId(bankId);
-    setContactType('contact');
-    setSelectedBank(bank);
-    setShowEmailForm(true);
-    
-    // Direct controleren of de state is bijgewerkt
-    setTimeout(() => {
-      console.log("showEmailForm na update:", showEmailForm);
-    }, 0);
+  // Vereenvoudigde versie van de contactfuncties
+  const handleContactRequest = (bankId) => {
+    // Gebruik prompt in plaats van een popup formulier
+    const email = window.prompt(`Voer je e-mailadres in om contact op te nemen met ${matches.find(b => b.id === bankId).name}:`);
+  
+    if (!email) return; // Als gebruiker annuleert of leeg laat
+  
+    // Bewaar deze informatie lokaal (geen API call)
+    alert(`Bedankt! Je contactverzoek met e-mail ${email} is geregistreerd.`);
   };
 
-  const handleGuidanceRequest = (event, bankId) => {
-    // Voorkom event bubbeling
-    event.preventDefault();
-    event.stopPropagation();
-    
-    const bank = matches.find(b => b.id === bankId);
-    console.log("Begeleiding aangevraagd voor:", bank.name);
-    console.log("showEmailForm vóór update:", showEmailForm);
-    
-    setSelectedBankId(bankId);
-    setContactType('guidance');
-    setSelectedBank(bank);
-    setShowEmailForm(true);
-    
-    // Direct controleren of de state is bijgewerkt
-    setTimeout(() => {
-      console.log("showEmailForm na update:", showEmailForm);
-    }, 0);
-  };
+  const handleGuidanceRequest = (bankId) => {
+    // Gebruik prompt in plaats van een popup formulier
+    const email = window.prompt(`Voer je e-mailadres in voor begeleiding bij ${matches.find(b => b.id === bankId).name}:`);
   
+    if (!email) return; // Als gebruiker annuleert of leeg laat
+  
+    // Bewaar deze informatie lokaal (geen API call)
+    alert(`Bedankt! Je begeleidingsverzoek met e-mail ${email} is geregistreerd.`);
+  };  
+    
   const submitLeadInfo = async () => {
     if (!userEmail) {
       alert('Vul alstublieft een e-mailadres in');
-      return;
+       return;
     }
     
     const bank = matches.find(b => b.id === selectedBankId);
@@ -184,14 +165,14 @@ const ResultsPage = () => {
             </div>
 
             <div className="px-6 pb-6 space-y-2">
-              <button
-                onClick={(e) => handleContactRequest(e, bank.id)}
+             <button
+                onClick={() => handleContactRequest(bank.id)}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition"
               >
                 Ik neem contact op
               </button>
               <button
-                onClick={(e) => handleGuidanceRequest(e, bank.id)}
+                onClick={() => handleGuidanceRequest(bank.id)}
                 className="w-full border border-blue-600 text-blue-600 hover:bg-blue-50 font-semibold py-2 px-4 rounded-lg transition"
               >
                 Ik wens begeleiding

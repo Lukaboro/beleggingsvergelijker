@@ -55,9 +55,9 @@ const questions = [
     description: 'Sleep de slider naar het gewenste bedrag.',
     type: 'slider',
     min: 0,
-    max: 250000,
-    step: 1000,
-    defaultValue: 25000,
+    max: 1000000,
+    step: 5000,
+    defaultValue: 50000,
   },
 ];
 

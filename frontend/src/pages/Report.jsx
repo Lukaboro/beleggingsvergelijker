@@ -3,10 +3,13 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+// Voeg deze constante bovenaan je bestand toe (buiten de component)
+const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://beleggingsvergelijker.onrender.com'
+  : 'http://localhost:8000';
+
 const Report = () => {
-  const navigate = useNavigate();
-  const [reportUrl, setReportUrl] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+  // ...bestaande code...
   
   useEffect(() => {
     const userPreferences = JSON.parse(localStorage.getItem('userPreferences'));
@@ -19,7 +22,7 @@ const Report = () => {
     // Generate the report
     const generateReport = async () => {
       try {
-        const response = await fetch('http://localhost:8000/api/generate-report', {
+        const response = await fetch(`${API_BASE_URL}/api/generate-report`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -35,7 +38,7 @@ const Report = () => {
         setIsLoading(false);
       }
     };
-    
+
     generateReport();
   }, [navigate]);
   

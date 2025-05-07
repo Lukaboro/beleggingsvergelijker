@@ -2,14 +2,12 @@
 
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-// Voeg deze constante bovenaan je bestand toe (buiten de component)
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://beleggingsvergelijker.onrender.com'
-  : 'http://localhost:8000';
+import API_URL from '../data/apiConfig'; // Importeer je API config
 
 const Report = () => {
-  // ...bestaande code...
+  const navigate = useNavigate();
+  const [reportUrl, setReportUrl] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
     const userPreferences = JSON.parse(localStorage.getItem('userPreferences'));
@@ -22,7 +20,10 @@ const Report = () => {
     // Generate the report
     const generateReport = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/generate-report`, {
+        console.log("Generating report with API URL:", `${API_URL}/generate-report`);
+        console.log("User preferences:", userPreferences);
+        
+        const response = await fetch(`${API_URL}/generate-report`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -30,12 +31,15 @@ const Report = () => {
           body: JSON.stringify(userPreferences),
         });
         
-        // Wanneer je de reportUrl instelt
         const data = await response.json();
+        console.log("Report response:", data);
+        
         // Controleer of de URL al absoluut is (begint met http)
         const fullReportUrl = data.report_url.startsWith('http') 
           ? data.report_url 
-          : `${API_BASE_URL}${data.report_url}`;
+          : `${API_URL.replace('/api', '')}${data.report_url}`;
+        
+        console.log("Full report URL:", fullReportUrl);
         setReportUrl(fullReportUrl);
         setIsLoading(false);
       } catch (error) {
@@ -43,7 +47,7 @@ const Report = () => {
         setIsLoading(false);
       }
     };
-
+    
     generateReport();
   }, [navigate]);
   
@@ -81,11 +85,11 @@ const Report = () => {
           
           <div className="text-center mb-8">
             <a
-              href={reportUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300"
-            >
+             href={reportUrl}
+             target="_blank"
+             rel="noopener noreferrer"
+             className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300"
+           >
               Bekijk je rapport
             </a>
           </div>
@@ -120,10 +124,10 @@ const Report = () => {
       
       <div className="text-center mt-10">
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/results')}
           className="text-blue-600 hover:text-blue-800 font-medium"
         >
-          Terug naar de startpagina
+          Terug naar de resultaten
         </button>
       </div>
     </div>

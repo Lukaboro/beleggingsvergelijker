@@ -1,4 +1,7 @@
 /* frontend/src/assets/styles/global.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Globale reset voor alle afbeeldingen en SVG's */
 img, svg {

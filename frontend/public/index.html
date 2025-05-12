@@ -5,7 +5,26 @@
     <title>Beleggingsvergelijker</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Vind de beleggingspartner die écht bij jou past" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind Config -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              orange: {
+                100: '#ffe8d6',
+                200: '#ffd6a5',
+                500: '#ff9e5d',
+                600: '#e85d04',
+                700: '#dc2f02'
+              }
+            }
+          }
+        }
+      }
+    </script>
     <!-- Basic CSS reset -->
     <style>
       * {

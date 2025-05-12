@@ -1,4 +1,4 @@
-// frontend/src/App.jsx - VERNIEUWDE VERSIE
+// frontend/src/App.jsx - Vereenvoudigde versie
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
@@ -9,13 +9,11 @@ import Report from './pages/Report';
 import About from './pages/About';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import './assets/styles/global.css';
 
 function App() {
   return (
     <Router>
-      {/* Test met een direct zichtbare achtergrondkleur */}
-      <div className="flex flex-col min-h-screen" style={{backgroundColor: '#ffd6a5'}}>
+      <div className="flex flex-col min-h-screen bg-orange-200">
         <Navbar />
         <main className="flex-grow">
           <Routes>

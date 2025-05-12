@@ -10,6 +10,7 @@ import About from './pages/About';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import './assets/styles/global.css';
+import TestPage from './pages/TestPage';
 
 function App() {
   // Deze stijl zou direct zichtbaar moeten zijn, ongeacht of Tailwind werkt
@@ -31,6 +32,7 @@ function App() {
             <Route path="/results" element={<Results />} />
             <Route path="/report" element={<Report />} />
             <Route path="/about" element={<About />} />
+            <Route path="/test" element={<TestPage />} />
           </Routes>
         </main>
         <Footer />

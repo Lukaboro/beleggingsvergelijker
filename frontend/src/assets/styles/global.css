@@ -84,3 +84,63 @@ nav a, footer a, .nav-links a {
   max-width: 32px;
   max-height: 32px;
 }
+
+/* Afbeeldingscontrole voor homepage */
+.home-page img, .intro-page img, 
+.home-page svg, .intro-page svg {
+  max-width: 200px !important; /* We gebruiken !important alleen voor afbeeldingen */
+  max-height: 200px !important;
+  margin: 0 auto;
+}
+
+/* Extra regels voor zeer grote SVG's en illustraties */
+.hero-illustration svg,
+.hero-illustration img,
+svg.large-icon,
+img.large-icon {
+  max-width: 300px !important;
+  max-height: 250px !important;
+}
+
+/* Extra visuele verbeteringen */
+body {
+  @apply text-gray-800;
+  background-color: #ffd6a5; /* Fallback voor oudere browsers */
+}
+
+h1, h2, h3, h4, h5, h6 {
+  @apply font-bold leading-tight text-gray-900;
+}
+
+h1 {
+  @apply text-4xl md:text-5xl mb-6;
+}
+
+h2 {
+  @apply text-3xl md:text-4xl mb-5;
+}
+
+h3 {
+  @apply text-2xl mb-4;
+}
+
+/* Verbeterde link styling voor navigatie */
+nav a {
+  @apply font-medium transition-colors duration-300;
+}
+
+/* Verbeterde call-to-action knoppen */
+.btn-primary, 
+.btn-secondary, 
+.btn-ghost {
+  @apply font-medium transition duration-200 inline-flex items-center justify-center;
+}
+
+/* Subtiele hover-effecten voor cards */
+.card, [class*="shadow"] {
+  @apply transition duration-300;
+}
+
+.card:hover, [class*="shadow"]:hover {
+  @apply shadow-lg;
+}

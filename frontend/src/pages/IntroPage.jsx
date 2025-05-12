@@ -1,90 +1,94 @@
 // frontend/src/pages/IntroPage.jsx
-
 import React from 'react';
 import { Link } from 'react-router-dom';
-
-const features = [
-  {
-    title: 'Beantwoord enkele vragen',
-    text: 'Deel je beleggingsdoelen en voorkeuren via een korte vragenlijst.',
-    icon: (
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-      />
-    )
-  },
-  {
-    title: 'Ontvang persoonlijke matches',
-    text: 'Krijg direct je top 3 geschikte beleggingspartners te zien.',
-    icon: (
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-        d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"
-      />
-    )
-  },
-  {
-    title: 'Maak een weloverwogen keuze',
-    text: 'Download een rapport met alle details om een beslissing te nemen.',
-    icon: (
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-      />
-    )
-  }
-];
+// Import je SVG of afbeelding
+// import HeroImage from '../assets/images/hero.svg';
 
 const IntroPage = () => {
   return (
-    <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen py-16 px-4">
-      <div className="max-w-5xl mx-auto text-center mb-16">
-        <h1 className="text-4xl md:text-5xl font-extrabold text-blue-800 leading-tight mb-6">
-          Vind de beleggingspartner<br />die écht bij jou past
-        </h1>
-        <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
-          In slechts 5 minuten vergelijken we jouw voorkeuren met de kenmerken van drie unieke beleggingspartners.
-        </p>
-      </div>
-
-      <div className="grid md:grid-cols-3 gap-10 max-w-6xl mx-auto mb-16">
-        {features.map((item, index) => (
-          <div key={index} className="bg-white p-6 rounded-2xl shadow-md text-center hover:shadow-lg transition">
-            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
-              <svg
-                className="w-8 h-8 text-blue-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+    <div className="intro-page bg-orange-100 min-h-screen">
+      <div className="container mx-auto px-4 py-16 md:py-24">
+        {/* Hero Section */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-12">
+          <div className="md:w-1/2">
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+              Vind de beleggingspartner<br />
+              <span className="text-orange-600">die écht bij jou past</span>
+            </h1>
+            
+            <p className="text-xl text-gray-700 mb-8">
+              In slechts 5 minuten vergelijken we jouw voorkeuren met de kenmerken van drie unieke beleggingspartners.
+            </p>
+            
+            <div className="flex flex-wrap gap-4">
+              <Link 
+                to="/wizard" 
+                className="btn-primary bg-orange-600 hover:bg-orange-700 text-white py-3 px-8 rounded-lg font-semibold text-lg shadow-md"
+              >
+                Start de vergelijking
+              </Link>
+              
+              <Link 
+                to="/about" 
+                className="btn-secondary bg-white hover:bg-gray-100 text-gray-800 py-3 px-8 rounded-lg font-semibold text-lg shadow-sm border border-gray-200"
+              >
+                Meer informatie
+              </Link>
+            </div>
+          </div>
+          
+          <div className="md:w-1/2 flex justify-center">
+            <div className="hero-illustration max-w-md">
+              {/* Voeg hier je afbeelding toe */}
+              {/* <img src={HeroImage} alt="Beleggingsvergelijker illustratie" /> */}
+              
+              {/* OF als fallback een SVG icoon */}
+              <svg 
+                viewBox="0 0 200 200" 
+                className="large-icon w-full h-auto"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                {item.icon}
+                {/* Vul hier je SVG-inhoud in */}
+                {/* Dit is slechts een voorbeeld */}
+                <circle cx="100" cy="100" r="80" fill="#ff9e5d" />
+                <path d="M50,100 Q100,50 150,100 Q100,150 50,100" stroke="#fff" strokeWidth="8" fill="none" />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">{item.title}</h3>
-            <p className="text-gray-600 text-sm">{item.text}</p>
           </div>
-        ))}
-      </div>
-
-      <div className="text-center">
-        <Link
-          to="/wizard"
-          className="bg-blue-600 hover:bg-blue-700 text-white text-xl font-semibold py-4 px-10 rounded-full shadow-lg transition duration-300"
-        >
-          Start vergelijking
-        </Link>
-        <p className="mt-3 text-sm text-gray-500">Tijdsinvestering: ongeveer 5 minuten, geen verplichtingen</p>
+        </div>
+        
+        {/* Features Section */}
+        <div className="mt-24 grid md:grid-cols-3 gap-8">
+          <div className="bg-white p-6 rounded-xl shadow-md">
+            <div className="icon-container w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mb-4">
+              <svg viewBox="0 0 24 24" className="w-6 h-6 text-orange-600">
+                <path fill="currentColor" d="M12 2L2 12h3v8h6v-6h2v6h6v-8h3L12 2z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold mb-3">Persoonlijke match</h3>
+            <p className="text-gray-600">Vind een beleggingspartner die aansluit bij jouw unieke voorkeuren en doelen.</p>
+          </div>
+          
+          {/* Voeg meer feature blocks toe */}
+        </div>
       </div>
     </div>
   );
 };
 
+/* Extra controle voor specifieke grote illustraties - voeg toe aan global.css */
+svg[viewBox],
+svg[width][height] {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Voor containers die een SVG bevatten */
+.svg-container svg {
+  width: 100%;
+  max-width: 300px;
+  max-height: 300px;
+  display: block;
+  margin: 0 auto;
+}
 export default IntroPage;

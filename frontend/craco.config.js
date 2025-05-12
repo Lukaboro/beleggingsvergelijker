@@ -1,18 +1,17 @@
 // frontend/craco.config.js
-const path = require('path');
-
 module.exports = {
   style: {
     postcss: {
-      plugins: [
-        require('tailwindcss'),
-        require('autoprefixer'),
-      ],
-    },
-  },
-  webpack: {
-    alias: {
-      '@': path.resolve(__dirname, 'src'),
+      loaderOptions: (postcssLoaderOptions) => {
+        console.log('PostCSS options:', postcssLoaderOptions);
+        postcssLoaderOptions.postcssOptions = {
+          plugins: [
+            require('tailwindcss'),
+            require('autoprefixer'),
+          ],
+        };
+        return postcssLoaderOptions;
+      },
     },
   },
 };

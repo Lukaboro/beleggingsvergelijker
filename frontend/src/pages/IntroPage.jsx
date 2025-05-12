@@ -69,26 +69,29 @@ const IntroPage = () => {
             <p className="text-gray-600">Vind een beleggingspartner die aansluit bij jouw unieke voorkeuren en doelen.</p>
           </div>
           
-          {/* Voeg meer feature blocks toe */}
+          <div className="bg-white p-6 rounded-xl shadow-md">
+            <div className="icon-container w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mb-4">
+              <svg viewBox="0 0 24 24" className="w-6 h-6 text-orange-600">
+                <path fill="currentColor" d="M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm1-8.41l2.54 2.54a1 1 0 0 1-1.42 1.42L11.3 12.7A1 1 0 0 1 11 12V8a1 1 0 0 1 2 0v3.59z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold mb-3">Snel en eenvoudig</h3>
+            <p className="text-gray-600">Binnen enkele minuten heb je een persoonlijk overzicht van de beste opties.</p>
+          </div>
+          
+          <div className="bg-white p-6 rounded-xl shadow-md">
+            <div className="icon-container w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mb-4">
+              <svg viewBox="0 0 24 24" className="w-6 h-6 text-orange-600">
+                <path fill="currentColor" d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2zm14 8V5H5v6h14zm0 2H5v6h14v-6zM8 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold mb-3">Transparant advies</h3>
+            <p className="text-gray-600">Duidelijke vergelijking zonder verborgen kosten of verplichtingen.</p>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-/* Extra controle voor specifieke grote illustraties - voeg toe aan global.css */
-svg[viewBox],
-svg[width][height] {
-  max-width: 100%;
-  height: auto;
-}
-
-/* Voor containers die een SVG bevatten */
-.svg-container svg {
-  width: 100%;
-  max-width: 300px;
-  max-height: 300px;
-  display: block;
-  margin: 0 auto;
-}
 export default IntroPage;

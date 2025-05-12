@@ -96,24 +96,7 @@ const About = () => {
         ↑
       </a>
 
-      {/* Tailwind extra klassen (optioneel in index.css plaatsen) */}
-      <style jsx>{`
-        .btn-primary {
-          @apply inline-flex items-center px-6 py-3 bg-orange-600 text-white rounded-lg font-semibold hover:bg-orange-700 transition;
-        }
-        .btn-secondary {
-          @apply inline-flex items-center px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition;
-        }
-        .btn-secondary-light {
-          @apply inline-flex items-center px-6 py-3 bg-white text-orange-600 rounded-lg font-semibold hover:bg-gray-100 transition;
-        }
-        .btn-ghost {
-          @apply inline-flex items-center px-6 py-3 bg-white/30 backdrop-blur-md text-gray-700 rounded-lg font-semibold hover:bg-white/40 transition;
-        }
-        .nav-link {
-          @apply px-4 py-2 rounded-full text-gray-600 hover:bg-gray-100 transition;
-        }
-      `}</style>
+
     </div>
   );
 };

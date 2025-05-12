@@ -1,4 +1,4 @@
-// frontend/src/App.jsx
+// frontend/src/App.jsx - VERNIEUWDE VERSIE
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
@@ -9,12 +9,13 @@ import Report from './pages/Report';
 import About from './pages/About';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import './assets/styles/global.css'; // Import van de globale CSS fix
+import './assets/styles/global.css';
 
 function App() {
   return (
     <Router>
-      <div className="flex flex-col min-h-screen">
+      {/* Test met een direct zichtbare achtergrondkleur */}
+      <div className="flex flex-col min-h-screen" style={{backgroundColor: '#ffd6a5'}}>
         <Navbar />
         <main className="flex-grow">
           <Routes>

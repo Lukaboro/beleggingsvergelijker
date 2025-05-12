@@ -1,70 +1,56 @@
-/* frontend/src/assets/styles/global.css */
+/* frontend/src/assets/styles/global.css - VERNIEUWDE VERSIE */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Globale reset voor alle afbeeldingen en SVG's */
-img, svg {
-    max-width: 100% !important;
-    max-height: 100% !important;
-    width: auto !important;
-    height: auto !important;
-    object-fit: contain !important;
+/* Voeg hier je custom component klassen toe */
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center px-6 py-3 bg-orange-600 text-white rounded-lg font-semibold hover:bg-orange-700 transition;
   }
-  
-  /* Specifieke controle voor SVG iconen in de app */
-  .icon-container {
-    width: 24px !important;
-    height: 24px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    overflow: hidden !important;
+  .btn-secondary {
+    @apply inline-flex items-center px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition;
   }
-  
-  .icon-container svg,
-  .icon-container img {
-    width: 16px !important;
-    height: 16px !important;
-    flex-shrink: 0 !important;
+  .btn-secondary-light {
+    @apply inline-flex items-center px-6 py-3 bg-white text-orange-600 rounded-lg font-semibold hover:bg-gray-100 transition;
   }
-  
-  /* Specifieke controle voor bank logo's en andere grote iconen */
-  .logo-container {
-    width: 48px !important;
-    height: 48px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    overflow: hidden !important;
+  .btn-ghost {
+    @apply inline-flex items-center px-6 py-3 bg-white/30 backdrop-blur-md text-gray-700 rounded-lg font-semibold hover:bg-white/40 transition;
   }
-  
-  .logo-container svg,
-  .logo-container img {
-    width: 32px !important;
-    height: 32px !important;
-    flex-shrink: 0 !important;
+  .nav-link {
+    @apply px-4 py-2 rounded-full text-gray-600 hover:bg-gray-100 transition;
   }
-  
-  /* Forceer elementen om hun ouder-container te respecteren */
-  .overflow-hidden {
-    overflow: hidden !important;
-  }
-  
-  /* Extra controle voor alle container divs met iconen */
-  div[class*="rounded-full"] {
-    max-width: 48px !important;
-    max-height: 48px !important;
-  }
-  
-  /* Override voor specifieke svg elementen in de IntroPage */
-  .container svg {
-    max-width: 24px !important;
-    max-height: 24px !important;
-  }
-  
-  /* Extra sterke override voor extreme gevallen */
-  div svg, div img {
-    max-width: 32px !important;
-    max-height: 32px !important;
-  }
+}
+
+/* Meer specifieke classes voor afbeeldingen en SVG's zonder !important overrides */
+.icon-container {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.icon-container svg,
+.icon-container img {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.logo-container {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.logo-container svg,
+.logo-container img {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}

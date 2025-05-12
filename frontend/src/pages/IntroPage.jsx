@@ -1,114 +1,138 @@
-// frontend/src/pages/IntroPage.jsx - Verbeterde versie
+// frontend/src/pages/IntroPage.jsx - Minimaal bestand met directe styling
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 
 const IntroPage = () => {
   return (
-    <div className="intro-page bg-orange-100 min-h-screen w-full">
-      <div className="container mx-auto px-4 py-12 md:py-20">
-        {/* Hero Section - Centered */}
-        <div className="max-w-4xl mx-auto text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-            Vind de beleggingspartner<br />
-            <span className="text-orange-600">die écht bij jou past</span>
-          </h1>
-          
-          <p className="text-xl text-gray-700 mb-8 max-w-2xl mx-auto">
-            In slechts 5 minuten vergelijken we jouw voorkeuren met de kenmerken van drie unieke beleggingspartners.
-          </p>
-          
-          {/* Grote, opvallende CTA knop (de "banaan") - Duidelijk gecentreerd */}
-          <div className="mb-8 flex justify-center">
-            <Link 
-              to="/wizard" 
-              className="inline-block text-center bg-orange-600 hover:bg-orange-700 text-white py-4 px-10 rounded-xl font-bold text-xl shadow-lg transition transform hover:scale-105 animate-pulse"
-              style={{maxWidth: 'none', width: 'auto'}} // Verwijder mogelijke max-width beperkingen
-            >
-              Start de vergelijking
-              <span className="block text-sm font-normal mt-1">Slechts 5 minuten</span>
-            </Link>
-          </div>
-          
-          {/* Voordelen - Gecentreerd */}
-          <div className="flex justify-center items-center text-sm text-gray-600 mb-12">
-            <svg className="w-5 h-5 text-orange-500 mr-2" style={{maxWidth: '20px', maxHeight: '20px'}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-            </svg>
-            <span>Gratis en vrijblijvend</span>
-          </div>
-        </div>
+    <div style={{
+      backgroundColor: '#ffd6a5', 
+      minHeight: '100vh', 
+      width: '100%', 
+      padding: '40px 20px',
+      fontFamily: 'sans-serif'
+    }}>
+      <div style={{
+        maxWidth: '1000px', 
+        margin: '0 auto', 
+        textAlign: 'center'
+      }}>
+        <h1 style={{
+          fontSize: '36px',
+          fontWeight: 'bold',
+          marginBottom: '20px',
+          color: '#333'
+        }}>
+          Vind de beleggingspartner<br />
+          <span style={{color: '#e85d04'}}>die écht bij jou past</span>
+        </h1>
         
-        {/* Features Section - 3 kolommen, responsive */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-16">
-          <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition text-center">
-            <div className="icon-container w-16 h-16 mx-auto bg-orange-100 rounded-full flex items-center justify-center mb-4">
-              <svg viewBox="0 0 24 24" className="w-8 h-8 text-orange-600" style={{maxWidth: '32px', maxHeight: '32px'}}>
-                <path fill="currentColor" d="M12 2L2 12h3v8h6v-6h2v6h6v-8h3L12 2z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold mb-3">Persoonlijke match</h3>
-            <p className="text-gray-600">Vind een beleggingspartner die aansluit bij jouw unieke voorkeuren en doelen.</p>
-          </div>
-          
-          <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition text-center">
-            <div className="icon-container w-16 h-16 mx-auto bg-orange-100 rounded-full flex items-center justify-center mb-4">
-              <svg viewBox="0 0 24 24" className="w-8 h-8 text-orange-600" style={{maxWidth: '32px', maxHeight: '32px'}}>
-                <path fill="currentColor" d="M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm1-8.41l2.54 2.54a1 1 0 0 1-1.42 1.42L11.3 12.7A1 1 0 0 1 11 12V8a1 1 0 0 1 2 0v3.59z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold mb-3">Snel en eenvoudig</h3>
-            <p className="text-gray-600">Binnen enkele minuten heb je een persoonlijk overzicht van de beste opties.</p>
-          </div>
-          
-          <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition text-center">
-            <div className="icon-container w-16 h-16 mx-auto bg-orange-100 rounded-full flex items-center justify-center mb-4">
-              <svg viewBox="0 0 24 24" className="w-8 h-8 text-orange-600" style={{maxWidth: '32px', maxHeight: '32px'}}>
-                <path fill="currentColor" d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2zm14 8V5H5v6h14zm0 2H5v6h14v-6zM8 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold mb-3">Transparant advies</h3>
-            <p className="text-gray-600">Duidelijke vergelijking zonder verborgen kosten of verplichtingen.</p>
-          </div>
-        </div>
+        <p style={{
+          fontSize: '18px',
+          maxWidth: '600px',
+          margin: '0 auto 30px',
+          color: '#555'
+        }}>
+          In slechts 5 minuten vergelijken we jouw voorkeuren met de kenmerken van drie unieke beleggingspartners.
+        </p>
         
-        {/* Testimonial Section - Duidelijk gecentreerd */}
-        <div className="max-w-3xl mx-auto mb-16 bg-white rounded-xl shadow-md p-8 border-l-4 border-orange-500">
-          <div className="flex flex-col md:flex-row items-center gap-6">
-            {/* Gebruikersfoto met fallback */}
-            <div className="flex-shrink-0">
-              <div className="w-24 h-24 rounded-full overflow-hidden bg-orange-200 border-4 border-orange-100 mx-auto">
-                {/* Fallback alternatief voor de gebruikersfoto */}
-                <svg 
-                  viewBox="0 0 24 24" 
-                  className="w-full h-full text-orange-400"
-                  style={{maxWidth: '100%', maxHeight: '100%'}}
-                  fill="currentColor"
-                >
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
-                </svg>
-              </div>
-            </div>
-            
-            <div className="flex-1 text-center md:text-left">
-              <blockquote className="text-lg text-gray-700 italic mb-4">
-                "Met BeleggingsTinder vond ik in enkele minuten de perfecte match voor mijn beleggingsstijl. Zo gemakkelijk en nuttig! Ik ben veel tijd bespaard gebleven door niet zelf alle opties te moeten onderzoeken."
-              </blockquote>
-              <div className="font-semibold text-gray-900">Laura Janssen</div>
-              <div className="text-sm text-gray-500">Beginnend belegger uit Amsterdam</div>
-            </div>
-          </div>
-        </div>
-        
-        {/* Extra CTA aan het einde - Gecentreerd */}
-        <div className="text-center mb-8">
-          <Link 
-            to="/wizard" 
-            className="inline-block bg-orange-600 hover:bg-orange-700 text-white py-3 px-8 rounded-lg font-semibold text-lg shadow-md transition"
-            style={{maxWidth: 'none', width: 'auto'}} // Verwijder mogelijke max-width beperkingen
-          >
-            Begin nu met vergelijken
+        {/* Opvallende CTA knop met inline styling */}
+        <div style={{marginBottom: '40px', display: 'flex', justifyContent: 'center'}}>
+          <Link to="/wizard" style={{
+            backgroundColor: '#e85d04',
+            color: 'white',
+            padding: '16px 32px',
+            borderRadius: '10px',
+            fontWeight: 'bold',
+            fontSize: '20px',
+            textDecoration: 'none',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+            display: 'inline-block',
+            textAlign: 'center'
+          }}>
+            Start de vergelijking
+            <span style={{display: 'block', fontSize: '14px', fontWeight: 'normal', marginTop: '5px'}}>
+              Slechts 5 minuten
+            </span>
           </Link>
         </div>
+        
+        {/* Features */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+          gap: '20px',
+          marginBottom: '40px'
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '10px',
+            padding: '20px',
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+            textAlign: 'center'
+          }}>
+            <h3 style={{fontSize: '20px', fontWeight: 'bold', marginBottom: '10px'}}>Persoonlijke match</h3>
+            <p style={{color: '#666'}}>Vind een beleggingspartner die aansluit bij jouw unieke voorkeuren en doelen.</p>
+          </div>
+          
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '10px',
+            padding: '20px',
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+            textAlign: 'center'
+          }}>
+            <h3 style={{fontSize: '20px', fontWeight: 'bold', marginBottom: '10px'}}>Snel en eenvoudig</h3>
+            <p style={{color: '#666'}}>Binnen enkele minuten heb je een persoonlijk overzicht van de beste opties.</p>
+          </div>
+          
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '10px',
+            padding: '20px',
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+            textAlign: 'center'
+          }}>
+            <h3 style={{fontSize: '20px', fontWeight: 'bold', marginBottom: '10px'}}>Transparant advies</h3>
+            <p style={{color: '#666'}}>Duidelijke vergelijking zonder verborgen kosten of verplichtingen.</p>
+          </div>
+        </div>
+        
+        {/* Testimonial met inline styling */}
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '10px',
+          padding: '20px',
+          maxWidth: '700px',
+          margin: '0 auto 40px',
+          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+          borderLeft: '4px solid #e85d04',
+          textAlign: 'left'
+        }}>
+          <blockquote style={{
+            fontSize: '16px',
+            fontStyle: 'italic',
+            marginBottom: '15px',
+            color: '#555'
+          }}>
+            "Met BeleggingsTinder vond ik in enkele minuten de perfecte match voor mijn beleggingsstijl. Zo gemakkelijk en nuttig! Ik ben veel tijd bespaard gebleven door niet zelf alle opties te moeten onderzoeken."
+          </blockquote>
+          <div style={{fontWeight: 'bold'}}>Laura Janssen</div>
+          <div style={{fontSize: '14px', color: '#777'}}>Beginnend belegger uit Amsterdam</div>
+        </div>
+        
+        {/* Extra CTA knop */}
+        <Link to="/wizard" style={{
+          backgroundColor: '#e85d04',
+          color: 'white',
+          padding: '12px 24px',
+          borderRadius: '8px',
+          fontWeight: 'bold',
+          textDecoration: 'none',
+          display: 'inline-block'
+        }}>
+          Begin nu met vergelijken
+        </Link>
       </div>
     </div>
   );

@@ -51,20 +51,25 @@ def calculate_bank_scores(user_preferences: Dict[str, Any]) -> List[Dict]:
     excluded_banks = []
     
     for bank in BANK_DATA:
-        # Filter op minimale rating indien opgegeven
-        bank_rating = bank.get("rating", 0)
-        print(f"Controleren bank {bank['name']} (rating {bank_rating})")
-        
-        if min_rating is not None and bank_rating < min_rating:
-            print(f"  ❌ Bank {bank['name']} UITGESLOTEN door ratingfilter: {bank_rating} < {min_rating}")
-            excluded_banks.append(bank['name'])
-            continue
-        else:
-            print(f"  ✓ Bank {bank['name']} voldoet aan rating criteria")
+    # Filter op minimale rating indien opgegeven
+    bank_rating = bank.get("rating", 0)
+    print(f"Controleren bank {bank['name']} (rating {bank_rating}, min_rating {min_rating})")
+    
+    # Expliciete check voor betere debugging
+    rating_check = min_rating is not None and bank_rating < min_rating
+    print(f"  Controle: min_rating is not None = {min_rating is not None}, bank_rating < min_rating = {bank_rating < min_rating if min_rating is not None else 'N/A'}")
+    print(f"  Volledige controle resultaat: {rating_check}")
+    
+    if rating_check:
+        print(f"  ❌ Bank {bank['name']} UITGESLOTEN door ratingfilter: {bank_rating} < {min_rating}")
+        excluded_banks.append(bank['name'])
+        continue
+    else:
+        print(f"  ✓ Bank {bank['name']} voldoet aan rating criteria")
 
-        score = 0
-        matches = []
-        penalties = []
+    score = 0
+    matches = []
+    penalties = []
 
         # Calculate score based on investment goal
         if investment_goal and "investment_goal" in bank["recommendation_points"]:

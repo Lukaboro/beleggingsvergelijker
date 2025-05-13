@@ -17,14 +17,28 @@ def calculate_bank_scores(user_preferences: Dict[str, Any]) -> List[Dict]:
     Returns:
         List of dictionaries with bank information and match scores, sorted by match score
     """
-    # Process min_rating - handle different input types and edge cases
+    # Verbeterde min_rating verwerking - robuuster tegen verschillende input types
+    min_rating = None
     min_rating_raw = user_preferences.get("min_rating")
-    try:
-        min_rating = int(min_rating_raw) if min_rating_raw is not None else None
-        # Treat 0 as 'no preference'
-        if min_rating == 0:
+    
+    # Verschillende gevallen afhandelen
+    if min_rating_raw is not None:
+        try:
+            # Als het een string is, probeer het te converteren naar int
+            if isinstance(min_rating_raw, str) and min_rating_raw.strip():
+                min_rating = int(min_rating_raw)
+            # Als het al een int is, gebruik het direct
+            elif isinstance(min_rating_raw, int):
+                min_rating = min_rating_raw
+            # Andere types (zoals float) naar int converteren
+            elif isinstance(min_rating_raw, (float, bool)):
+                min_rating = int(min_rating_raw)
+        except (ValueError, TypeError):
+            # Bij fouten, geen filtering toepassen
             min_rating = None
-    except (TypeError, ValueError):
+    
+    # 0 behandelen als 'geen voorkeur'
+    if min_rating == 0:
         min_rating = None
     
     # Extract other user preferences
@@ -32,13 +46,26 @@ def calculate_bank_scores(user_preferences: Dict[str, Any]) -> List[Dict]:
     investment_horizon = user_preferences.get("investment_horizon")
     management_style = user_preferences.get("management_style")
     preference = user_preferences.get("preference")
-    amount = int(user_preferences.get("amount", 0))
+    # Robuuste conversie van amount
+    amount = 0
+    try:
+        amount_raw = user_preferences.get("amount", 0)
+        amount = int(amount_raw) if amount_raw is not None else 0
+    except (ValueError, TypeError):
+        amount = 0
     
     bank_scores = []
     
     for bank in BANK_DATA:
-        # Filter by minimum rating if specified
-        bank_rating = bank.get("rating", 0)
+        # Robuuste verwerking van bank_rating
+        bank_rating = 0
+        try:
+            rating_raw = bank.get("rating", 0)
+            bank_rating = int(rating_raw) if rating_raw is not None else 0
+        except (ValueError, TypeError):
+            bank_rating = 0
+        
+        # Filter by minimum rating if specified - striktere typering
         if min_rating is not None and bank_rating < min_rating:
             continue
         
@@ -107,7 +134,7 @@ def calculate_bank_scores(user_preferences: Dict[str, Any]) -> List[Dict]:
             "matchScore": match_percentage,
             "key_matches": matches,
             "key_mismatches": penalties,
-            "rating": bank_rating
+            "rating": bank_rating  # Gebruik de geconverteerde bank_rating
         })
     
     # Sort results by match score

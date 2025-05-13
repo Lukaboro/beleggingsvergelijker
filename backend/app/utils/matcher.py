@@ -19,9 +19,9 @@ def calculate_bank_scores(user_preferences: Dict[str, Any]) -> List[Dict]:
     # Veilige conversie van minimum_rating
     min_rating_raw = user_preferences.get("minimum_rating")
     try:
-        min_rating = int(min_rating_raw)
+        min_rating = int(min_rating_raw) if min_rating_raw is not None else None
     except (TypeError, ValueError):
-        min_rating = 0
+        min_rating = None
 
     # Debug log
     print(f"User preferences: {user_preferences}")
@@ -29,7 +29,7 @@ def calculate_bank_scores(user_preferences: Dict[str, Any]) -> List[Dict]:
     for bank in BANK_DATA:
         # Filter op minimale rating indien opgegeven
         bank_rating = bank.get("rating", 0)
-        if min_rating and bank_rating < min_rating:
+        if min_rating is not None and bank_rating < min_rating:
             print(f"Bank {bank['name']} uitgesloten door ratingfilter: {bank_rating} < {min_rating}")
             continue
 

@@ -15,19 +15,22 @@ def calculate_bank_scores(user_preferences: Dict[str, Any]) -> List[Dict]:
     management_style = user_preferences.get("management_style")
     preference = user_preferences.get("preference")
     amount = int(user_preferences.get("amount", 0))  # Zorg ervoor dat amount een integer is
+
+    # Veilige conversie van minimum_rating
     min_rating_raw = user_preferences.get("minimum_rating")
     try:
         min_rating = int(min_rating_raw)
     except (TypeError, ValueError):
-        min_rating = 0  # Geen geldige invoer betekent: geen filter
-
+        min_rating = 0
 
     # Debug log
     print(f"User preferences: {user_preferences}")
 
     for bank in BANK_DATA:
         # Filter op minimale rating indien opgegeven
-        if min_rating and bank.get("rating", 0) < min_rating:
+        bank_rating = bank.get("rating", 0)
+        if min_rating and bank_rating < min_rating:
+            print(f"Bank {bank['name']} uitgesloten door ratingfilter: {bank_rating} < {min_rating}")
             continue
 
         score = 0
@@ -94,11 +97,12 @@ def calculate_bank_scores(user_preferences: Dict[str, Any]) -> List[Dict]:
             "weaknesses": bank["weaknesses"],
             "matchScore": match_percentage,
             "key_matches": matches,
-            "key_mismatches": penalties
+            "key_mismatches": penalties,
+            "rating": bank_rating
         })
 
     for bs in bank_scores:
-        print(f"Bank: {bs['name']}, Score: {bs['matchScore']}, Matches: {bs['key_matches']}, Mismatches: {bs['key_mismatches']}")
+        print(f"Bank: {bs['name']}, Score: {bs['matchScore']}, Rating: {bs['rating']}, Matches: {bs['key_matches']}, Mismatches: {bs['key_mismatches']}")
 
     bank_scores.sort(key=lambda x: x["matchScore"], reverse=True)
 

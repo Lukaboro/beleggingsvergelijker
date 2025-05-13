@@ -1,51 +1,42 @@
 from typing import Dict, List, Any
 from app.data.bank_data import BANK_DATA
+import time  # Voor het genereren van een unieke timestamp
 
 def calculate_bank_scores(user_preferences: Dict[str, Any]) -> List[Dict]:
     """
     Calculate scores for each bank based on user preferences
-    
-    Args:
-        user_preferences: Dictionary with user preferences including:
-            - min_rating: Minimum acceptable rating (int or None)
-            - investment_goal: User's investment goal
-            - investment_horizon: User's investment time horizon
-            - management_style: Preferred management style
-            - preference: User's general preference
-            - amount: Investment amount (integer)
-            
-    Returns:
-        List of dictionaries with bank information and match scores, sorted by match score
+    with anti-caching maatregelen
     """
-    # Verbeterde min_rating verwerking - robuuster tegen verschillende input types
+    # Genereer een timestamp om te zien of deze functie opnieuw wordt aangeroepen
+    current_timestamp = time.time()
+    print(f"[DEBUG {current_timestamp}] Functie aangeroepen met user_preferences: {user_preferences}")
+    
+    # Robuuste min_rating verwerking (zoals eerder)
     min_rating = None
     min_rating_raw = user_preferences.get("min_rating")
     
-    # Verschillende gevallen afhandelen
     if min_rating_raw is not None:
         try:
-            # Als het een string is, probeer het te converteren naar int
             if isinstance(min_rating_raw, str) and min_rating_raw.strip():
                 min_rating = int(min_rating_raw)
-            # Als het al een int is, gebruik het direct
             elif isinstance(min_rating_raw, int):
                 min_rating = min_rating_raw
-            # Andere types (zoals float) naar int converteren
             elif isinstance(min_rating_raw, (float, bool)):
                 min_rating = int(min_rating_raw)
         except (ValueError, TypeError):
-            # Bij fouten, geen filtering toepassen
             min_rating = None
     
-    # 0 behandelen als 'geen voorkeur'
     if min_rating == 0:
         min_rating = None
     
-    # Extract other user preferences
+    print(f"[DEBUG {current_timestamp}] min_rating na verwerking: {min_rating}")
+    
+    # Andere user preferences ophalen
     investment_goal = user_preferences.get("investment_goal")
     investment_horizon = user_preferences.get("investment_horizon")
     management_style = user_preferences.get("management_style")
     preference = user_preferences.get("preference")
+    
     # Robuuste conversie van amount
     amount = 0
     try:
@@ -54,9 +45,16 @@ def calculate_bank_scores(user_preferences: Dict[str, Any]) -> List[Dict]:
     except (ValueError, TypeError):
         amount = 0
     
-    bank_scores = []
+    # Maak een kopie van BANK_DATA om te voorkomen dat we een gecachte versie gebruiken
+    current_bank_data = list(BANK_DATA)
+    print(f"[DEBUG {current_timestamp}] Aantal banken geladen: {len(current_bank_data)}")
     
-    for bank in BANK_DATA:
+    bank_scores = []
+    filtered_banks = []  # Bijhouden welke banken worden uitgefilterd
+    
+    for bank in current_bank_data:
+        bank_id = bank.get("id", "unknown")
+        
         # Robuuste verwerking van bank_rating
         bank_rating = 0
         try:
@@ -65,10 +63,13 @@ def calculate_bank_scores(user_preferences: Dict[str, Any]) -> List[Dict]:
         except (ValueError, TypeError):
             bank_rating = 0
         
-        # Filter by minimum rating if specified - striktere typering
+        # Filter by minimum rating if specified
         if min_rating is not None and bank_rating < min_rating:
+            print(f"[DEBUG {current_timestamp}] Bank {bank_id} gefilterd: rating {bank_rating} < min_rating {min_rating}")
+            filtered_banks.append(bank_id)
             continue
         
+        # Rest van de scoring logica blijft hetzelfde...
         score = 0
         matches = []
         penalties = []
@@ -81,6 +82,9 @@ def calculate_bank_scores(user_preferences: Dict[str, Any]) -> List[Dict]:
                 matches.append(f"Beleggingsdoel: {investment_goal}")
             elif goal_score < 3:
                 penalties.append(f"Niet optimaal voor beleggingsdoel: {investment_goal}")
+        
+        # Andere scoring criteria
+        # [Code voor andere criteria]
         
         # Calculate score based on investment horizon
         if investment_horizon and "investment_horizon" in bank["recommendation_points"]:
@@ -137,8 +141,20 @@ def calculate_bank_scores(user_preferences: Dict[str, Any]) -> List[Dict]:
             "rating": bank_rating  # Gebruik de geconverteerde bank_rating
         })
     
+    # Log uitgefilterde banken
+    print(f"[DEBUG {current_timestamp}] Uitgefilterde banken: {', '.join(filtered_banks) if filtered_banks else 'geen'}")
+    
     # Sort results by match score
     bank_scores.sort(key=lambda x: x["matchScore"], reverse=True)
     
+    # Debug welke banken in de top 3 zitten vóór retourneren
+    for i, bank in enumerate(bank_scores[:3], 1):
+        print(f"[DEBUG {current_timestamp}] Top {i}: {bank['id']} - Score: {bank['matchScore']}, Rating: {bank['rating']}")
+    
+    # Voeg een force-unique indicator toe aan resultaten om caching tegen te gaan
+    final_results = bank_scores[:3]
+    for bank in final_results:
+        bank["_nocache"] = current_timestamp
+    
     # Return top 3 banks
-    return bank_scores[:3]
+    return final_results

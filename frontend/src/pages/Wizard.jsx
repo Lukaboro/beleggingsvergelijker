@@ -124,6 +124,8 @@ const Wizard = () => {
   
   // Cleanup effect om timeout te annuleren bij unmount
   useEffect(() => {
+    // Wis eerder opgeslagen resultaten om zeker verse data te krijgen
+    localStorage.removeItem('matchResults');
     return () => {
       if (timeoutId) {
         clearTimeout(timeoutId);
@@ -167,9 +169,9 @@ const Wizard = () => {
     
     // Stel timeout in voor 5 seconden
     const timeout = setTimeout(() => {
-      console.error("API aanroep timeout na 5 seconden");
+      console.error("API aanroep timeout na 10 seconden");
       useFallbackData(userAnswers, "API aanroep timeout");
-    }, 5000);
+    }, 10000);
     
     setTimeoutId(timeout);
     

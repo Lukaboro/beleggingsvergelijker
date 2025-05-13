@@ -4,38 +4,30 @@ from app.data.bank_data import BANK_DATA
 def calculate_bank_scores(user_preferences: Dict[str, Any]) -> List[Dict]:
     """
     Calculate scores for each bank based on user preferences
-    """
-    # Log de belangrijke parameters
-    print("="*50)
-    print("ONTVANGEN USER PREFERENCES:")
-    min_rating_raw = user_preferences.get("min_rating")
-    print(f"min_rating: {min_rating_raw} (type: {type(min_rating_raw).__name__})")
     
-    # Verwerk min_rating
+    Args:
+        user_preferences: Dictionary with user preferences including:
+            - min_rating: Minimum acceptable rating (int or None)
+            - investment_goal: User's investment goal
+            - investment_horizon: User's investment time horizon
+            - management_style: Preferred management style
+            - preference: User's general preference
+            - amount: Investment amount (integer)
+            
+    Returns:
+        List of dictionaries with bank information and match scores, sorted by match score
+    """
+    # Process min_rating - handle different input types and edge cases
+    min_rating_raw = user_preferences.get("min_rating")
     try:
         min_rating = int(min_rating_raw) if min_rating_raw is not None else None
-        if min_rating == 0:  # Behandel 0 als 'geen voorkeur'
+        # Treat 0 as 'no preference'
+        if min_rating == 0:
             min_rating = None
     except (TypeError, ValueError):
         min_rating = None
     
-    print(f"Verwerkte min_rating: {min_rating}")
-    
-    # Zoek Argenta in de bankgegevens
-    argenta_found = False
-    argenta_rating = None
-    
-    for bank in BANK_DATA:
-        if bank["id"] == "argenta":
-            argenta_found = True
-            argenta_rating = bank.get("rating", 0)
-            print(f"Argenta gevonden in BANK_DATA met rating: {argenta_rating}")
-            break
-    
-    if not argenta_found:
-        print("Argenta niet gevonden in BANK_DATA!")
-    
-    # Extract user preferences
+    # Extract other user preferences
     investment_goal = user_preferences.get("investment_goal")
     investment_horizon = user_preferences.get("investment_horizon")
     management_style = user_preferences.get("management_style")
@@ -45,23 +37,10 @@ def calculate_bank_scores(user_preferences: Dict[str, Any]) -> List[Dict]:
     bank_scores = []
     
     for bank in BANK_DATA:
-        # Speciale debugging voor Argenta
-        is_argenta = bank["id"] == "argenta"
-        
-        # Filter op minimale rating indien opgegeven
+        # Filter by minimum rating if specified
         bank_rating = bank.get("rating", 0)
-        
-        if is_argenta:
-            print(f"Rating check voor Argenta - bank_rating: {bank_rating}, min_rating: {min_rating}")
-            print(f"Zou Argenta uitgesloten moeten worden? {min_rating is not None and bank_rating < min_rating}")
-        
         if min_rating is not None and bank_rating < min_rating:
-            if is_argenta:
-                print("Argenta UITGESLOTEN door rating check!")
             continue
-        else:
-            if is_argenta:
-                print("Argenta GEACCEPTEERD na rating check!")
         
         score = 0
         matches = []
@@ -75,9 +54,6 @@ def calculate_bank_scores(user_preferences: Dict[str, Any]) -> List[Dict]:
                 matches.append(f"Beleggingsdoel: {investment_goal}")
             elif goal_score < 3:
                 penalties.append(f"Niet optimaal voor beleggingsdoel: {investment_goal}")
-        
-        # Andere score berekeningen...
-        # [behoud de rest van de score berekeningen zoals in je originele code]
         
         # Calculate score based on investment horizon
         if investment_horizon and "investment_horizon" in bank["recommendation_points"]:
@@ -112,7 +88,7 @@ def calculate_bank_scores(user_preferences: Dict[str, Any]) -> List[Dict]:
             if min_amount <= amount <= max_amount:
                 matches.append(f"Bedrag: €{amount}")
             else:
-                score -= 10  # Verhoogde penalty als het bedrag buiten bereik is
+                score -= 10  # Higher penalty if amount is out of range
                 if amount < min_amount:
                     penalties.append(f"Bedrag te laag (minimum €{min_amount})")
                 else:
@@ -134,17 +110,8 @@ def calculate_bank_scores(user_preferences: Dict[str, Any]) -> List[Dict]:
             "rating": bank_rating
         })
     
-    # Sorteer de resultaten
+    # Sort results by match score
     bank_scores.sort(key=lambda x: x["matchScore"], reverse=True)
     
-    # Check of Argenta in de top 3 zit
-    argenta_in_top3 = any(bank["id"] == "argenta" for bank in bank_scores[:3])
-    print(f"Is Argenta in de top 3 resultaten? {argenta_in_top3}")
-    
-    # Bekijk de top 3 banken
-    print("Top 3 banken:")
-    for i, bank in enumerate(bank_scores[:3], 1):
-        print(f"{i}. {bank['name']} (ID: {bank['id']}) - Score: {bank['matchScore']}, Rating: {bank['rating']}")
-    
-    # Geef de top 3 banken terug
+    # Return top 3 banks
     return bank_scores[:3]

@@ -8,6 +8,7 @@ BANK_DATA = [
         "name": "KBC",
         "logo": "kbc.svg",
         "description": "Sterk vertegenwoordigde bank met zowel retail als private banking, inzet op digitale innovatie.",
+        "rating": 5,
         "strengths": [
             "Gebruiksvriendelijke app en digitale tools",
             "Groot kantorennetwerk en lokale aanwezigheid",
@@ -53,6 +54,7 @@ BANK_DATA = [
         "name": "BNP Paribas Fortis",
         "logo": "bnp.svg",
         "description": "Grote Belgische bank met breed beleggingsaanbod, inclusief duurzame en internationale fondsen.",
+        "rating": 5,
         "strengths": [
             "Sterke internationale expertise",
             "Breed fondsenaanbod, ook ESG",
@@ -98,6 +100,7 @@ BANK_DATA = [
         "name": "Argenta",
         "logo": "argenta.svg",
         "description": "Toegankelijke bank met focus op eenvoud en lage kosten, populair bij spaarders en starters.",
+        "rating": 3,
         "strengths": [
             "Zeer lage kostenstructuur",
             "Eenvoudige, begrijpelijke producten",
@@ -143,6 +146,7 @@ BANK_DATA = [
         "name": "Crelan-Axa",
         "logo": "crelan.svg",
         "description": "Coöperatieve bank met persoonlijke service en lokale verankering, fusie met AXA Bank versterkt positie.",
+        "rating": 5,
         "strengths": [
             "Persoonlijke aanpak via lokale kantoren",
             "Breed aanbod klassieke fondsen",
@@ -188,6 +192,7 @@ BANK_DATA = [
         "name": "ING",
         "logo": "ing.svg",
         "description": "Internationale speler met zowel digitale zelfbelegging als begeleiding via adviseurs.",
+        "rating": 5,
         "strengths": [
             "Goede online tools en beleggingsplatform",
             "Internationaal aanbod",
@@ -233,6 +238,7 @@ BANK_DATA = [
         "name": "Belfius",
         "logo": "belfius.svg",
         "description": "Sterk in digitale innovatie én lokaal verankerde dienstverlening, met groeiende focus op duurzaam beleggen.",
+        "rating": 5,
         "strengths": [
             "Innovatieve beleggingsapp",
             "Goede balans tussen digitaal en persoonlijk",
@@ -278,6 +284,7 @@ BANK_DATA = [
         "name": "Beobank",
         "logo": "beobank.svg",
         "description": "Toegankelijke bank met focus op persoonlijke service, relatief klein aanbod beleggingsproducten.",
+        "rating": 3,
         "strengths": [
             "Laagdrempelig advies voor starters",
             "Lokale aanwezigheid",
@@ -323,6 +330,7 @@ BANK_DATA = [
         "name": "Bank Delen",
         "logo": "delen.svg",
         "description": "Private bank met focus op vermogensbeheer, gespecialiseerd in familiale vermogens en ondernemers.",
+        "rating": 5,
         "strengths": [
             "Zeer persoonlijke aanpak",
             "Ervaren vermogensbeheerders",
@@ -368,6 +376,7 @@ BANK_DATA = [
         "name": "Degroof Petercam",
         "logo": "degroof.svg",
         "description": "Exclusieve private bank met hoogstaande expertise in beleggingen, fiscaliteit en estate planning.",
+        "rating": 5,
         "strengths": [
             "Hoogstaande expertise in financiële planning",
             "Ruime toegang tot institutionele beleggingen",

@@ -1,4 +1,5 @@
-// frontend/src/pages/ResultsPage.jsx - Aangepaste versie
+
+// frontend/src/pages/ResultsPage.jsx - VERBETERDE VERSIE MET ANTI-CACHING
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
@@ -6,18 +7,95 @@ import API_URL from '../data/apiConfig'; // Importeer je API config
 
 const ResultsPage = () => {
   const [matches, setMatches] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedBank, setSelectedBank] = useState(null);
-  // Nieuwe state variabelen
   const [userEmail, setUserEmail] = useState('');
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [contactType, setContactType] = useState('');
   const [selectedBankId, setSelectedBankId] = useState(null);
 
   useEffect(() => {
-    const storedMatches = localStorage.getItem('matchResults');
-    if (storedMatches) {
-      setMatches(JSON.parse(storedMatches));
-    }
+    // BELANGRIJKE FIX: Met deze functie garanderen we dat de resultaten kloppen met de actuele voorkeuren
+    const fetchResults = async () => {
+      setLoading(true);
+      
+      try {
+        // Haal de opgeslagen voorkeuren op
+        const userPreferences = JSON.parse(localStorage.getItem('userPreferences')) || {};
+        console.log("Opgehaalde userPreferences:", userPreferences);
+        
+        // Controleer of min_rating is ingesteld en debug het
+        console.log("min_rating in voorkeuren:", userPreferences.min_rating, 
+                    "type:", typeof userPreferences.min_rating);
+        
+        // Roep de backend aan om verse resultaten te krijgen
+        const response = await fetch(`${API_URL}/match`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Cache-Control': 'no-store, no-cache, must-revalidate'
+          },
+          body: JSON.stringify(userPreferences),
+        });
+        
+        if (!response.ok) {
+          throw new Error(`API Error: ${response.status}`);
+        }
+        
+        // Parse de response
+        const text = await response.text();
+        console.log("Ruwe API response:", text);
+        
+        const data = JSON.parse(text);
+        console.log("API resultaten:", data);
+        
+        if (data.matches && Array.isArray(data.matches)) {
+          // Update localStorage en state met nieuwe resultaten
+          localStorage.setItem('matchResults', JSON.stringify(data.matches));
+          setMatches(data.matches);
+          
+          // Debug info over banken ratings
+          console.log("Ontvangen bank ratings:");
+          data.matches.forEach(bank => {
+            console.log(`${bank.name}: rating = ${bank.rating}, score = ${bank.matchScore}`);
+          });
+          
+          // Extra validatie voor min_rating
+          if (userPreferences.min_rating && userPreferences.min_rating !== '0') {
+            const minRatingValue = parseInt(userPreferences.min_rating);
+            const invalidBanks = data.matches.filter(bank => bank.rating < minRatingValue);
+            
+            if (invalidBanks.length > 0) {
+              console.warn("WAARSCHUWING: Deze banken hebben een lagere rating dan het minimum:");
+              invalidBanks.forEach(bank => {
+                console.warn(`- ${bank.name} (Rating: ${bank.rating}, Min vereist: ${minRatingValue})`);
+              });
+            } else {
+              console.log("✅ Alle banken voldoen aan de minimum rating vereiste");
+            }
+          }
+        } else {
+          throw new Error("Ongeldig formaat voor matches in response");
+        }
+      } catch (error) {
+        console.error("Error bij ophalen resultaten:", error);
+        
+        // Fallback naar opgeslagen resultaten indien beschikbaar
+        const storedMatches = localStorage.getItem('matchResults');
+        if (storedMatches) {
+          console.log("Gebruik opgeslagen resultaten als fallback");
+          setMatches(JSON.parse(storedMatches));
+        } else {
+          console.error("Geen opgeslagen resultaten beschikbaar");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    // Roep de fetchResults functie aan bij het laden van de pagina
+    fetchResults();
   }, []);
 
   // Vereenvoudigde versie van de contactfuncties
@@ -58,7 +136,7 @@ const ResultsPage = () => {
         },
         body: JSON.stringify({
           email: userEmail,
-          name: '', // Optioneel, kan je later uitbreiden
+          name: '', 
           interest_in_guidance: contactType === 'guidance',
           preferences: userPreferences
         }),
@@ -79,6 +157,21 @@ const ResultsPage = () => {
       alert(`Er is iets misgegaan: ${error.message}`);
     }
   };
+
+  // Loading state tonen
+  if (loading) {
+    return (
+      <div className="results-page bg-gray-50 min-h-screen py-16 px-4 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-orange-600 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Resultaten laden...</h2>
+          <p className="text-gray-600">
+            We zoeken de beste beleggingspartners op basis van je criteria.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="results-page bg-gray-50 min-h-screen py-16 px-4">
@@ -102,6 +195,18 @@ const ResultsPage = () => {
               <div className="flex justify-between items-center mb-3">
                 <span className="text-sm text-gray-500">Matchscore</span>
                 <span className="text-lg font-bold text-orange-600">{bank.matchScore}%</span>
+              </div>
+
+              {/* Rating indicator toevoegen */}
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-sm text-gray-500">Rating</span>
+                <div className="flex">
+                  {[...Array(bank.rating || 0)].map((_, i) => (
+                    <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
               </div>
 
               {/* Opnieuw gestileerde icon container met strikte afmetingen */}

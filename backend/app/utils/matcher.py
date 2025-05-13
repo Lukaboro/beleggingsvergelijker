@@ -1,5 +1,3 @@
-# backend/app/utils/matcher.py
-
 from typing import Dict, List, Any
 from app.data.bank_data import BANK_DATA
 
@@ -7,6 +5,13 @@ def calculate_bank_scores(user_preferences: Dict[str, Any]) -> List[Dict]:
     """
     Calculate scores for each bank based on user preferences
     """
+    # Extra debug logging aan het begin
+    print("="*50)
+    print("ONTVANGEN USER PREFERENCES:")
+    for key, value in user_preferences.items():
+        print(f"  {key}: {value} (type: {type(value).__name__})")
+    print("="*50)
+    
     bank_scores = []
 
     # Extract user preferences
@@ -16,22 +21,46 @@ def calculate_bank_scores(user_preferences: Dict[str, Any]) -> List[Dict]:
     preference = user_preferences.get("preference")
     amount = int(user_preferences.get("amount", 0))  # Zorg ervoor dat amount een integer is
 
-    # Veilige conversie van minimum_rating
+    # EXTRA DEBUG: Controleer specifiek voor min_rating en alternatieve sleutelwoorden
+    print("Direct controleren op verschillende mogelijke sleutels voor min_rating:")
+    for possible_key in ["min_rating", "minimum_rating", "rating", "minimale_rating", "minimum_rating"]:
+        value = user_preferences.get(possible_key)
+        print(f"  - Sleutel '{possible_key}': {value}")
+
+    # Veilige conversie van min_rating
     min_rating_raw = user_preferences.get("min_rating")
+    print(f"Gevonden min_rating_raw: {min_rating_raw} (type: {type(min_rating_raw).__name__})")
+    
     try:
         min_rating = int(min_rating_raw) if min_rating_raw is not None else None
+        # Als 0, behandel als geen voorkeur
+        if min_rating == 0:
+            print("min_rating is 0 ('Geen voorkeur'), zetten op None voor geen filtering")
+            min_rating = None
     except (TypeError, ValueError):
+        print(f"Fout bij conversie van min_rating '{min_rating_raw}' naar int")
         min_rating = None
 
     # Debug log
-    print(f"User preferences: {user_preferences}")
+    print(f"Uiteindelijke min_rating voor filtering: {min_rating}")
+    print("Alle banken en hun ratings:")
+    for bank in BANK_DATA:
+        print(f"  - {bank['name']}: {bank.get('rating', 'Geen rating')}")
 
+    # Lijst om uitgesloten banken bij te houden
+    excluded_banks = []
+    
     for bank in BANK_DATA:
         # Filter op minimale rating indien opgegeven
         bank_rating = bank.get("rating", 0)
+        print(f"Controleren bank {bank['name']} (rating {bank_rating})")
+        
         if min_rating is not None and bank_rating < min_rating:
-            print(f"Bank {bank['name']} uitgesloten door ratingfilter: {bank_rating} < {min_rating}")
+            print(f"  ❌ Bank {bank['name']} UITGESLOTEN door ratingfilter: {bank_rating} < {min_rating}")
+            excluded_banks.append(bank['name'])
             continue
+        else:
+            print(f"  ✓ Bank {bank['name']} voldoet aan rating criteria")
 
         score = 0
         matches = []
@@ -101,9 +130,20 @@ def calculate_bank_scores(user_preferences: Dict[str, Any]) -> List[Dict]:
             "rating": bank_rating
         })
 
+    # Uitgebreide debug output voor resultaten
+    print("="*50)
+    print(f"Uitgesloten banken: {', '.join(excluded_banks) if excluded_banks else 'Geen'}")
+    print("Alle banken voor sortering:")
     for bs in bank_scores:
-        print(f"Bank: {bs['name']}, Score: {bs['matchScore']}, Rating: {bs['rating']}, Matches: {bs['key_matches']}, Mismatches: {bs['key_mismatches']}")
-
+        print(f"Bank: {bs['name']}, Score: {bs['matchScore']}, Rating: {bs['rating']}")
+    
+    print("="*50)
+    print("Sorteren banken op matchScore...")
     bank_scores.sort(key=lambda x: x["matchScore"], reverse=True)
+    
+    print("Top 3 banken na sortering:")
+    for i, bs in enumerate(bank_scores[:3], 1):
+        print(f"{i}. {bs['name']}, Score: {bs['matchScore']}, Rating: {bs['rating']}")
+    print("="*50)
 
     return bank_scores[:3]

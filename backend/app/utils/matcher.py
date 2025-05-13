@@ -15,7 +15,12 @@ def calculate_bank_scores(user_preferences: Dict[str, Any]) -> List[Dict]:
     management_style = user_preferences.get("management_style")
     preference = user_preferences.get("preference")
     amount = int(user_preferences.get("amount", 0))  # Zorg ervoor dat amount een integer is
-    min_rating = int(user_preferences.get("minimum_rating", 0) or 0)
+    min_rating_raw = user_preferences.get("minimum_rating")
+    try:
+        min_rating = int(min_rating_raw)
+    except (TypeError, ValueError):
+        min_rating = 0  # Geen geldige invoer betekent: geen filter
+
 
     # Debug log
     print(f"User preferences: {user_preferences}")

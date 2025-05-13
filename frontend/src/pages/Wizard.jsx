@@ -59,6 +59,19 @@ const questions = [
     step: 5000,
     defaultValue: 50000,
   },
+  {
+    id: 'min_rating',
+    title: 'Wat is je minimale beoordeling voor een beleggingspartner?',
+    description: 'Kies de minimale sterrenbeoordeling die je acceptabel vindt.',
+    type: 'rating', // Nieuw vraagtype voor sterrenbeoordelingen
+    helpText: 'Sterrenbeoordelingen zijn gebaseerd op klantbeoordelingen en onafhankelijke analyses. Een hogere minimale beoordeling beperkt je keuzes, maar kan leiden tot betere service.', // Tekst voor de help-popup
+    options: [
+      { value: 3, label: '3 sterren' },
+      { value: 4, label: '4 sterren' },
+      { value: 5, label: '5 sterren' },
+      { value: 0, label: 'Geen voorkeur' },
+    ],
+  },
 ];
 
 // Mock data voor gebruik als fallback

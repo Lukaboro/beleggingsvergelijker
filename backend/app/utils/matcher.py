@@ -17,7 +17,7 @@ def calculate_bank_scores(user_preferences: Dict[str, Any]) -> List[Dict]:
     amount = int(user_preferences.get("amount", 0))  # Zorg ervoor dat amount een integer is
 
     # Veilige conversie van minimum_rating
-    min_rating_raw = user_preferences.get("minimum_rating")
+    min_rating_raw = user_preferences.get("min_rating")
     try:
         min_rating = int(min_rating_raw) if min_rating_raw is not None else None
     except (TypeError, ValueError):

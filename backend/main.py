@@ -10,9 +10,14 @@ import os
 from datetime import datetime
 from app.utils.matcher import calculate_bank_scores
 from app.utils.pdf_generator import generate_report
+from app.api.banks import router as banks_router
+from app.api.tables import router as tables_router
 
 app = FastAPI(title="Beleggingspartner Vergelijker API")
-
+# Register API routers
+app.include_router(banks_router)
+app.include_router(tables_router)
+                   
 # CORS middleware voor lokale ontwikkeling
 app.add_middleware(
     CORSMiddleware,

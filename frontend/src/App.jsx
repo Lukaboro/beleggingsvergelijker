@@ -12,6 +12,7 @@ import Footer from './components/Footer';
 import './assets/styles/global.css';
 import TestPage from './pages/TestPage';
 import TailwindTest from './pages/TailwindTest';
+import ApiTest from './components/ApiTest';
 
 function App() {
   // Deze stijl zou direct zichtbaar moeten zijn, ongeacht of Tailwind werkt
@@ -23,23 +24,9 @@ function App() {
   };
 
   return (
-    <Router>
-      <div style={appStyle}>
-        <Navbar />
-        <main style={{ flex: '1' }}>
-          <Routes>
-            <Route path="/" element={<IntroPage />} />
-            <Route path="/wizard" element={<Wizard />} />
-            <Route path="/results" element={<Results />} />
-            <Route path="/report" element={<Report />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/test" element={<TestPage />} />
-            <Route path="/tailwind-test" element={<TailwindTest />} />
-          </Routes>
-        </main>
-        <Footer />
-      </div>
-    </Router>
+  <div className="App">
+    <ApiTest />
+  </div>
   );
 }
 

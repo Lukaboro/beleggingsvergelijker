@@ -12,11 +12,13 @@ from app.utils.matcher import calculate_bank_scores
 from app.utils.pdf_generator import generate_report
 from app.api.banks import router as banks_router
 from app.api.tables import router as tables_router
+from app.api.matching import router as matching_router
 
 app = FastAPI(title="Beleggingspartner Vergelijker API")
 # Register API routers
 app.include_router(banks_router)
 app.include_router(tables_router)
+app.include_router(matching_router)
                    
 # CORS middleware voor lokale ontwikkeling
 app.add_middleware(

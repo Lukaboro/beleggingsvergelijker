@@ -1,130 +1,11 @@
-// frontend/src/pages/Wizard.jsx
+// frontend/src/pages/Wizard.jsx - Database-gedreven versie
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProgressBar from '../components/ProgressBar';
 import QuestionCard from '../components/QuestionCard';
+import apiService from '../services/api';
 import API_URL from '../data/apiConfig';
-
-// Vragen array behouden
-const questions = [
-  {
-    id: 'investment_goal',
-    title: 'Wat is je belangrijkste beleggingsdoel?',
-    description: 'Kies het doel dat het beste bij je situatie past.',
-    options: [
-      { value: 'groei', label: 'Vermogensgroei op lange termijn' },
-      { value: 'pensioen', label: 'Pensioenopbouw' },
-      { value: 'kapitaalbehoud', label: 'Behoud van kapitaal met beperkt risico' },
-      { value: 'inkomen', label: 'Genereren van regelmatig inkomen' },
-    ],
-  },
-  {
-    id: 'investment_horizon',
-    title: 'Hoe lang ben je van plan te beleggen?',
-    description: 'Je beleggingshorizon bepaalt mede je risicoprofiel.',
-    options: [
-      { value: '<3 jaar', label: 'Korte termijn (minder dan 3 jaar)' },
-      { value: '3-10 jaar', label: 'Middellange termijn (3 tot 10 jaar)' },
-      { value: '>10 jaar', label: 'Lange termijn (meer dan 10 jaar)' },
-    ],
-  },
-  {
-    id: 'management_style',
-    title: 'Hoe wil je je beleggingen beheren?',
-    description: 'Kies de beheerstijl die het beste bij je past.',
-    options: [
-      { value: 'zelf doen', label: 'Zelf beleggen (volledige controle)' },
-      { value: 'met hulp', label: 'Met begeleiding (advies, maar zelf beslissen)' },
-      { value: 'volledig uitbesteden', label: 'Volledig uitbesteden (vermogensbeheer)' },
-    ],
-  },
-  {
-    id: 'preference',
-    title: 'Wat is voor jou het belangrijkste bij het kiezen van een beleggingspartner?',
-    description: 'Kies de factor die voor jou het zwaarst weegt.',
-    options: [
-      { value: 'lage kosten', label: 'Lage kosten en transparante tarieven' },
-      { value: 'duurzaamheid', label: 'Duurzaam en maatschappelijk verantwoord beleggen' },
-      { value: 'vertrouwen/advies', label: 'Persoonlijk advies en vertrouwen' },
-    ],
-  },
-  {
-    id: 'amount',
-    title: 'Welk bedrag ben je van plan te beleggen?',
-    description: 'Sleep de slider naar het gewenste bedrag.',
-    type: 'slider',
-    min: 0,
-    max: 1000000,
-    step: 5000,
-    defaultValue: 50000,
-  },
-  {
-    id: 'min_rating',
-    title: 'Wat is je minimale beoordeling voor een beleggingspartner?',
-    description: 'Kies de minimale sterrenbeoordeling die je acceptabel vindt.',
-    type: 'rating', // Nieuw vraagtype voor sterrenbeoordelingen
-    helpText: 'Sterrenbeoordelingen zijn gebaseerd op klantbeoordelingen en onafhankelijke analyses. Een hogere minimale beoordeling beperkt je keuzes, maar kan leiden tot betere service.', // Tekst voor de help-popup
-    options: [
-      { value: 3, label: '3 sterren' },
-      { value: 4, label: '4 sterren' },
-      { value: 5, label: '5 sterren' },
-      { value: 0, label: 'Geen voorkeur' },
-    ],
-  },
-];
-
-// Mock data voor gebruik als fallback
-const mockMatches = [
-  {
-    id: "bank1",
-    name: "Nova Invest",
-    logo: "nova_invest.svg",
-    description: "Innovatieve online broker gericht op zelfstandige beleggers",
-    strengths: [
-      "Lage kosten en transparante tarieven",
-      "Uitgebreid educatief platform",
-      "Eenvoudige en intuïtieve interface"
-    ],
-    weaknesses: [
-      "Beperkte persoonlijke ondersteuning",
-      "Geen fysieke kantoren"
-    ],
-    matchScore: 85
-  },
-  {
-    id: "bank2",
-    name: "GreenCap",
-    logo: "greencap.svg",
-    description: "Duurzame vermogensbeheerder met focus op impact investing",
-    strengths: [
-      "Specialisatie in duurzame beleggingsstrategieën",
-      "Persoonlijke begeleiding door experts",
-      "Transparante impact rapportage"
-    ],
-    weaknesses: [
-      "Hogere kosten dan pure online aanbieders",
-      "Beperkt aanbod niet-duurzame beleggingen"
-    ],
-    matchScore: 70
-  },
-  {
-    id: "bank3",
-    name: "Fortex",
-    logo: "fortex.svg",
-    description: "Traditionele bank met uitgebreide vermogensplanning en advies",
-    strengths: [
-      "Persoonlijke adviseur en lokale kantoren",
-      "Volledig geïntegreerde bankdiensten",
-      "Focus op veiligheid en stabiliteit"
-    ],
-    weaknesses: [
-      "Hogere kosten voor transacties en beheer",
-      "Minder innovatieve beleggingsopties"
-    ],
-    matchScore: 60
-  }
-];
 
 const Wizard = () => {
   const navigate = useNavigate();
@@ -132,66 +13,184 @@ const Wizard = () => {
   const [answers, setAnswers] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  // Aparte state voor timeout tracking
   const [timeoutId, setTimeoutId] = useState(null);
   
-  // Cleanup effect om timeout te annuleren bij unmount
+  // Nieuwe state voor dynamische vragen
+  const [questions, setQuestions] = useState([]);
+  const [questionsLoading, setQuestionsLoading] = useState(true);
+  const [dienstTypes, setDienstTypes] = useState([]);
+
+  // Laad dynamische data bij component mount
   useEffect(() => {
-    // Wis eerder opgeslagen resultaten om zeker verse data te krijgen
-    localStorage.removeItem('matchResults');
+    loadDynamicQuestions();
     return () => {
       if (timeoutId) {
         clearTimeout(timeoutId);
       }
     };
-  }, [timeoutId]);
-  
+  }, []);
+
+  const loadDynamicQuestions = async () => {
+    try {
+      setQuestionsLoading(true);
+      
+      // Haal unieke type_aanbod waarden op uit diensten tabel
+      const dienstenData = await apiService.getTableData('diensten', {
+        select: 'type_aanbod',
+        filter_column: 'status',
+        filter_value: 'actief'
+      });
+      
+      console.log('Diensten data:', dienstenData);
+      
+      // Extract unieke type_aanbod waarden
+      const uniqueTypes = [...new Set(
+        dienstenData.data
+          .map(item => item.type_aanbod)
+          .filter(type => type && type.trim() !== '')
+      )];
+      
+      console.log('Unieke dienst types:', uniqueTypes);
+      setDienstTypes(uniqueTypes);
+      
+      // Logaritmische schaal voor bedrag slider
+      const logScale = [0, 100, 500, 1000, 5000, 10000, 50000, 100000, 500000, 1000000];
+      
+      // Bouw dynamische vragen array
+      const dynamicQuestions = [
+        {
+          id: 'type_dienst',
+          title: 'Welk type beleggingsdienst zoek je?',
+          description: 'Kies het type dienst dat het beste bij je wensen past.',
+          type: 'options',
+          options: uniqueTypes.map(type => ({
+            value: type,
+            label: type
+          }))
+        },
+        {
+          id: 'bedrag',
+          title: 'Welk bedrag ben je van plan te beleggen?',
+          description: 'Sleep de slider naar het gewenste bedrag.',
+          type: 'slider',
+          min: 0,
+          max: 1000000,
+          step: 5000,
+          defaultValue: 50000,
+          logScale: logScale, // Voor logaritmische weergave
+          helpText: 'Dit bedrag wordt gebruikt om diensten te filteren op minimum beleggingsbedrag.'
+        },
+        {
+          id: 'kosten_belangrijkheid',
+          title: 'Hoe belangrijk zijn lage kosten voor jou?',
+          description: 'Dit bepaalt welke diensten we voorstellen op basis van hun totale kosten.',
+          type: 'options',
+          helpText: 'Zeer belangrijk: alleen diensten met <1.5% totale kosten. Belangrijk: diensten met <2.2% totale kosten. Niet belangrijk: alle diensten.',
+          options: [
+            { value: 'zeer_belangrijk', label: 'Zeer belangrijk - Ik wil de laagste kosten' },
+            { value: 'belangrijk', label: 'Belangrijk - Kosten wegen mee in mijn beslissing' },
+            { value: 'niet_belangrijk', label: 'Niet belangrijk - Andere factoren zijn belangrijker' }
+          ]
+        }
+      ];
+      
+      setQuestions(dynamicQuestions);
+      setQuestionsLoading(false);
+      
+    } catch (error) {
+      console.error('Error loading dynamic questions:', error);
+      setError('Kon vragen niet laden. Probeer het opnieuw.');
+      setQuestionsLoading(false);
+    }
+  };
+
+  // Mock data voor gebruik als fallback (ongewijzigd)
+  const mockMatches = [
+    {
+      id: "bank1",
+      name: "Nova Invest",
+      logo: "nova_invest.svg",
+      description: "Innovatieve online broker gericht op zelfstandige beleggers",
+      strengths: [
+        "Lage kosten en transparante tarieven",
+        "Uitgebreid educatief platform",
+        "Eenvoudige en intuïtieve interface"
+      ],
+      weaknesses: [
+        "Beperkte persoonlijke ondersteuning",
+        "Geen fysieke kantoren"
+      ],
+      matchScore: 85
+    },
+    {
+      id: "bank2",
+      name: "GreenCap",
+      logo: "greencap.svg",
+      description: "Duurzame vermogensbeheerder met focus op impact investing",
+      strengths: [
+        "Specialisatie in duurzame beleggingsstrategieën",
+        "Persoonlijke begeleiding door experts",
+        "Transparante impact rapportage"
+      ],
+      weaknesses: [
+        "Hogere kosten dan pure online aanbieders",
+        "Beperkt aanbod niet-duurzame beleggingen"
+      ],
+      matchScore: 70
+    },
+    {
+      id: "bank3",
+      name: "Fortex",
+      logo: "fortex.svg",
+      description: "Traditionele bank met uitgebreide vermogensplanning en advies",
+      strengths: [
+        "Persoonlijke adviseur en lokale kantoren",
+        "Volledig geïntegreerde bankdiensten",
+        "Focus op veiligheid en stabiliteit"
+      ],
+      weaknesses: [
+        "Hogere kosten voor transacties en beheer",
+        "Minder innovatieve beleggingsopties"
+      ],
+      matchScore: 60
+    }
+  ];
+
   const handleNext = (answer) => {
-    // Update answers
     const updatedAnswers = { ...answers, [questions[currentStep].id]: answer };
     setAnswers(updatedAnswers);
     
-    // Move to next question or submit
     if (currentStep < questions.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Submit answers
       submitAnswers(updatedAnswers);
     }
   };
   
   const useFallbackData = (userAnswers, reason) => {
     console.log(`Gebruik fallback data vanwege: ${reason}`);
-    
-    // Sla mock resultaten op in localStorage
     localStorage.setItem('matchResults', JSON.stringify(mockMatches));
     localStorage.setItem('userPreferences', JSON.stringify(userAnswers));
-    
     setIsLoading(false);
-    
-    // Navigeer naar resultaten
     navigate('/results');
   };
   
   const submitAnswers = async (userAnswers) => {
     console.log("Versturen van antwoorden naar backend:", JSON.stringify(userAnswers));
-    console.log("API URL:", `${API_URL}/match`);
     
     setIsLoading(true);
     setError(null);
     
-    // Stel timeout in voor 5 seconden
     const timeout = setTimeout(() => {
-      console.error("API aanroep timeout na 10 seconden");
+      console.error("API aanroep timeout na 30 seconden");
       useFallbackData(userAnswers, "API aanroep timeout");
-    }, 10000);
+    }, 30000);
     
     setTimeoutId(timeout);
     
     try {
-      // De standaard fetch API heeft geen ingebouwde timeout
-      // We gebruiken onze eigen timeout-mechanisme
-      const response = await fetch(`${API_URL}/match`, {
+      // Nieuwe API endpoint voor database-matching
+      const response = await fetch(`${API_URL}/match-diensten`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -200,11 +199,8 @@ const Wizard = () => {
         body: JSON.stringify(userAnswers),
       });
       
-      // Annuleer de timeout omdat we een antwoord hebben
       clearTimeout(timeout);
       setTimeoutId(null);
-      
-      console.log("Response status:", response.status);
       
       if (response.status === 404) {
         console.error("API endpoint niet gevonden (404)");
@@ -212,11 +208,8 @@ const Wizard = () => {
         return;
       }
       
-      // Lees de ruwe response tekst voor debugging
       const responseText = await response.text();
-      console.log("Ruwe response:", responseText);
       
-      // Als het geen geldige JSON is, gebruik fallback
       let data;
       try {
         data = JSON.parse(responseText);
@@ -226,58 +219,99 @@ const Wizard = () => {
         return;
       }
       
-      console.log("Geparseerde API response data:", data);
-      
       if (!response.ok) {
         console.error(`API error: ${response.status}`, data);
         useFallbackData(userAnswers, `API error: ${response.status}`);
         return;
       }
       
-      // Controleer of de data de verwachte structuur heeft
       if (!data.matches || !Array.isArray(data.matches)) {
         console.error("Onverwacht response formaat:", data);
         useFallbackData(userAnswers, "Onverwacht response formaat");
         return;
       }
       
-      // Sla resultaten op in localStorage
       localStorage.setItem('matchResults', JSON.stringify(data.matches));
       localStorage.setItem('userPreferences', JSON.stringify(userAnswers));
       
       setIsLoading(false);
-      
-      // Navigeer naar resultaten
       navigate('/results');
     } catch (error) {
-      // Annuleer de timeout in geval van een fout
       clearTimeout(timeout);
       setTimeoutId(null);
-      
       console.error("Error bij het versturen van antwoorden:", error);
       useFallbackData(userAnswers, error.message);
     }
   };
   
-  // Skip naar fallback data als gebruiker annuleert
   const handleCancel = () => {
     setIsLoading(false);
     if (timeoutId) {
       clearTimeout(timeoutId);
       setTimeoutId(null);
     }
-    
     useFallbackData(answers, "Geannuleerd door gebruiker");
   };
   
-  // Bereken huidige vraag en voortgang
+  // Loading state voor vragen
+  if (questionsLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12 px-4">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-6">
+            <h1 className="text-3xl md:text-4xl font-extrabold text-blue-800 mb-2">
+              Jouw persoonlijke beleggingsprofiel
+            </h1>
+            <p className="text-gray-600">
+              Vragen worden geladen...
+            </p>
+          </div>
+          <div className="bg-white rounded-xl shadow-md p-6 text-center">
+            <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-600">Even geduld, we laden de meest recente opties...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error && !isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12 px-4">
+        <div className="max-w-3xl mx-auto">
+          <div className="bg-white rounded-xl shadow-md p-6">
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+              <p>{error}</p>
+            </div>
+            <button
+              onClick={() => {
+                setError(null);
+                loadDynamicQuestions();
+              }}
+              className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 mr-4"
+            >
+              Probeer opnieuw
+            </button>
+            <button
+              onClick={() => navigate('/')}
+              className="bg-gray-600 text-white py-2 px-4 rounded hover:bg-gray-700"
+            >
+              Terug naar start
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Normale wizard flow
   const currentQuestion = questions[currentStep];
   const progress = ((currentStep + 1) / questions.length) * 100;
   
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
       <div className="max-w-3xl mx-auto">
-        {/* Titel boven de progress bar */}
         <div className="text-center mb-6">
           <h1 className="text-3xl md:text-4xl font-extrabold text-blue-800 mb-2">
             Jouw persoonlijke beleggingsprofiel
@@ -304,18 +338,6 @@ const Wizard = () => {
               className="text-blue-600 underline mt-4"
             >
               Annuleren en doorgaan met voorbeeldresultaten
-            </button>
-          </div>
-        ) : error ? (
-          <div className="bg-white rounded-xl shadow-md p-6 mt-4">
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-              <p>{error}</p>
-            </div>
-            <button
-              onClick={() => setError(null)}
-              className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
-            >
-              Probeer opnieuw
             </button>
           </div>
         ) : (

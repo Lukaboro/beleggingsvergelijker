@@ -29,7 +29,7 @@ const ResultsPage = () => {
                     "type:", typeof userPreferences.min_rating);
         
         // Roep de backend aan om verse resultaten te krijgen
-        const response = await fetch(`${API_URL}/match`, {
+        const response = await fetch(`${API_URL}/match-diensten`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

@@ -24,10 +24,24 @@ function App() {
   };
 
   return (
-  <div className="App">
-    <ApiTest />
-  </div>
-  );
+  <Router>
+    <div className="App" style={appStyle}>
+      <Navbar />
+      <main style={{ flex: 1 }}>
+        <Routes>
+          <Route path="/" element={<IntroPage />} />
+          <Route path="/wizard" element={<Wizard />} />
+          <Route path="/results" element={<Results />} />
+          <Route path="/report" element={<Report />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/test" element={<TestPage />} />
+          <Route path="/tailwind-test" element={<TailwindTest />} />
+        </Routes>
+      </main>
+      <Footer />
+    </div>
+  </Router>
+);
 }
 
 export default App;

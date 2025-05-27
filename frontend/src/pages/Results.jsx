@@ -14,22 +14,39 @@ const ResultsPage = () => {
   const [contactType, setContactType] = useState('');
   const [selectedBankId, setSelectedBankId] = useState(null);
 
-  useEffect(() => {
-    // BELANGRIJKE FIX: Met deze functie garanderen we dat de resultaten kloppen met de actuele voorkeuren
-    const fetchResults = async () => {
-      setLoading(true);
+// Vervang de useEffect in je Results.jsx met deze versie:
+
+useEffect(() => {
+  const fetchResults = async () => {
+    setLoading(true);
+    
+    try {
+      // GEBRUIK DE OPGESLAGEN RESULTATEN VAN WIZARD PERFORMANCE TEST
+      const storedMatches = localStorage.getItem('matchResults');
+      const userPreferences = JSON.parse(localStorage.getItem('userPreferences')) || {};
       
-      try {
-        // Haal de opgeslagen voorkeuren op
-        const userPreferences = JSON.parse(localStorage.getItem('userPreferences')) || {};
-        console.log("Opgehaalde userPreferences:", userPreferences);
+      console.log("Opgehaalde userPreferences:", userPreferences);
+      console.log("Opgeslagen matches:", storedMatches);
+      
+      if (storedMatches) {
+        // Gebruik de resultaten van de performance test
+        const matches = JSON.parse(storedMatches);
+        setMatches(matches);
         
-        // Controleer of min_rating is ingesteld en debug het
-        console.log("min_rating in voorkeuren:", userPreferences.min_rating, 
-                    "type:", typeof userPreferences.min_rating);
+        console.log("✅ Gebruikt opgeslagen performance test resultaten");
+        console.log("Matches count:", matches.length);
         
-        // Roep de backend aan om verse resultaten te krijgen
-        const response = await fetch(`${API_URL}/match-diensten`, {
+        // Debug info over banken ratings
+        console.log("Ontvangen bank ratings:");
+        matches.forEach(bank => {
+          console.log(`${bank.name}: rating = ${bank.rating}, score = ${bank.matchScore}, tco = ${bank.details?.tco}`);
+        });
+        
+      } else {
+        console.warn("Geen opgeslagen resultaten gevonden - fallback naar API call");
+        
+        // FALLBACK: Als geen opgeslagen resultaten, roep optimized endpoint aan
+        const response = await fetch(`${API_URL}/match-diensten-optimized`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -43,60 +60,44 @@ const ResultsPage = () => {
           throw new Error(`API Error: ${response.status}`);
         }
         
-        // Parse de response
-        const text = await response.text();
-        console.log("Ruwe API response:", text);
-        
-        const data = JSON.parse(text);
-        console.log("API resultaten:", data);
+        const data = await response.json();
+        console.log("Fallback API resultaten:", data);
         
         if (data.matches && Array.isArray(data.matches)) {
-          // Update localStorage en state met nieuwe resultaten
-          localStorage.setItem('matchResults', JSON.stringify(data.matches));
           setMatches(data.matches);
-          
-          // Debug info over banken ratings
-          console.log("Ontvangen bank ratings:");
-          data.matches.forEach(bank => {
-            console.log(`${bank.name}: rating = ${bank.rating}, score = ${bank.matchScore}`);
-          });
-          
-          // Extra validatie voor min_rating
-          if (userPreferences.min_rating && userPreferences.min_rating !== '0') {
-            const minRatingValue = parseInt(userPreferences.min_rating);
-            const invalidBanks = data.matches.filter(bank => bank.rating < minRatingValue);
-            
-            if (invalidBanks.length > 0) {
-              console.warn("WAARSCHUWING: Deze banken hebben een lagere rating dan het minimum:");
-              invalidBanks.forEach(bank => {
-                console.warn(`- ${bank.name} (Rating: ${bank.rating}, Min vereist: ${minRatingValue})`);
-              });
-            } else {
-              console.log("✅ Alle banken voldoen aan de minimum rating vereiste");
-            }
-          }
+          // Sla nieuwe resultaten op
+          localStorage.setItem('matchResults', JSON.stringify(data.matches));
         } else {
           throw new Error("Ongeldig formaat voor matches in response");
         }
-      } catch (error) {
-        console.error("Error bij ophalen resultaten:", error);
-        
-        // Fallback naar opgeslagen resultaten indien beschikbaar
-        const storedMatches = localStorage.getItem('matchResults');
-        if (storedMatches) {
-          console.log("Gebruik opgeslagen resultaten als fallback");
-          setMatches(JSON.parse(storedMatches));
-        } else {
-          console.error("Geen opgeslagen resultaten beschikbaar");
-        }
-      } finally {
-        setLoading(false);
       }
-    };
-    
-    // Roep de fetchResults functie aan bij het laden van de pagina
-    fetchResults();
-  }, []);
+      
+    } catch (error) {
+      console.error("Error bij ophalen resultaten:", error);
+      
+      // Final fallback naar mock data indien nodig
+      const mockData = [
+        {
+          id: "mock1",
+          name: "Fallback Bank",
+          matchScore: 75,
+          rating: 4,
+          strengths: ["Reliable fallback"],
+          weaknesses: ["Mock data"],
+          details: { tco: 0.02 }
+        }
+      ];
+      
+      setMatches(mockData);
+      console.log("Gebruikt mock data als final fallback");
+      
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  fetchResults();
+}, []);
 
   // Vereenvoudigde versie van de contactfuncties
   const handleContactRequest = (bankId) => {

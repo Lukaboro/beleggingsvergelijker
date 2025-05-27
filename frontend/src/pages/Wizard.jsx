@@ -1,4 +1,4 @@
-// frontend/src/pages/Wizard.jsx - Database-gedreven versie
+// frontend/src/pages/Wizard.jsx - Opgeschoonde versie met optimized endpoint
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -15,7 +15,7 @@ const Wizard = () => {
   const [error, setError] = useState(null);
   const [timeoutId, setTimeoutId] = useState(null);
   
-  // Nieuwe state voor dynamische vragen
+  // State voor dynamische vragen
   const [questions, setQuestions] = useState([]);
   const [questionsLoading, setQuestionsLoading] = useState(true);
   const [dienstTypes, setDienstTypes] = useState([]);
@@ -104,7 +104,7 @@ const Wizard = () => {
     }
   };
 
-  // Mock data voor gebruik als fallback (ongewijzigd)
+  // Mock data voor gebruik als fallback
   const mockMatches = [
     {
       id: "bank1",
@@ -174,6 +174,25 @@ const Wizard = () => {
     setIsLoading(false);
     navigate('/results');
   };
+
+  // Productie-ready matching functie
+  const getMatches = async (userAnswers) => {
+    // Gebruik altijd de optimized endpoint
+    const response = await fetch(`${API_URL}/match-diensten-optimized`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(userAnswers),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`);
+    }
+    
+    return await response.json();
+  };
   
   const submitAnswers = async (userAnswers) => {
     console.log("Versturen van antwoorden naar backend:", JSON.stringify(userAnswers));
@@ -189,41 +208,10 @@ const Wizard = () => {
     setTimeoutId(timeout);
     
     try {
-      // Nieuwe API endpoint voor database-matching
-      const response = await fetch(`${API_URL}/match-diensten`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify(userAnswers),
-      });
+      const data = await getMatches(userAnswers);
       
       clearTimeout(timeout);
       setTimeoutId(null);
-      
-      if (response.status === 404) {
-        console.error("API endpoint niet gevonden (404)");
-        useFallbackData(userAnswers, "API endpoint niet gevonden");
-        return;
-      }
-      
-      const responseText = await response.text();
-      
-      let data;
-      try {
-        data = JSON.parse(responseText);
-      } catch (jsonError) {
-        console.error("Error bij het parsen van JSON:", jsonError);
-        useFallbackData(userAnswers, "Ongeldige JSON response");
-        return;
-      }
-      
-      if (!response.ok) {
-        console.error(`API error: ${response.status}`, data);
-        useFallbackData(userAnswers, `API error: ${response.status}`);
-        return;
-      }
       
       if (!data.matches || !Array.isArray(data.matches)) {
         console.error("Onverwacht response formaat:", data);
@@ -236,6 +224,7 @@ const Wizard = () => {
       
       setIsLoading(false);
       navigate('/results');
+      
     } catch (error) {
       clearTimeout(timeout);
       setTimeoutId(null);
@@ -333,6 +322,7 @@ const Wizard = () => {
           <div className="bg-white rounded-xl shadow-md p-6 mt-4 text-center">
             <p className="text-gray-600 mb-2">Bezig met verwerken van je antwoorden...</p>
             <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-sm text-gray-500 mb-4">🚀 Zoeken naar beste matches...</p>
             <button
               onClick={handleCancel}
               className="text-blue-600 underline mt-4"

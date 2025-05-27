@@ -1,0 +1,21 @@
+# Node (frontend)
+node_modules/
+build/
+dist/
+.env
+
+# Python (backend)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.Python
+*.sqlite3
+backend/.env
+backend/requirements_temp.txt
+
+# OS / Editor
+.DS_Store
+.vscode/
+*.log

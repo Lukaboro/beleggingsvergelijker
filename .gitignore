@@ -19,3 +19,4 @@ backend/requirements_temp.txt
 .DS_Store
 .vscode/
 *.log
+__pycache__/

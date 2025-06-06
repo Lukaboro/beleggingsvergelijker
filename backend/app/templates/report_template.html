@@ -1,172 +1,448 @@
 <!-- backend/app/templates/report_template.html -->
-
 <!DOCTYPE html>
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Persoonlijk Beleggingsadvies</title>
+    <title>BeleggingsTinder Rapport</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
+        
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: #ffffff;
+            font-size: 14px;
         }
+        
+        .page {
+            margin: 20px;
+            padding: 40px;
+            min-height: 90vh;
+        }
+        
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
+            border-bottom: 3px solid #ea580c;
             padding-bottom: 20px;
-            border-bottom: 1px solid #ddd;
         }
-        .date {
-            text-align: right;
-            color: #777;
-            font-size: 14px;
-            margin-bottom: 20px;
+        
+        .header h1 {
+            color: #ea580c;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
         }
-        h1 {
-            color: #2c5282;
-            margin-bottom: 20px;
+        
+        .header .subtitle {
+            color: #6b7280;
+            font-size: 16px;
+            margin-bottom: 12px;
         }
-        h2 {
-            color: #2c5282;
-            margin-top: 30px;
-            margin-bottom: 15px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
-        }
-        .summary-box {
-            background-color: #f8f9fa;
-            border-radius: 5px;
-            padding: 20px;
-            margin-bottom: 30px;
-        }
-        .summary-item {
-            margin-bottom: 10px;
-        }
-        .bank-card {
-            margin-bottom: 30px;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        .bank-name {
-            font-size: 20px;
-            font-weight: bold;
-            color: #2c5282;
-            margin-bottom: 10px;
-        }
-        .bank-desc {
-            margin-bottom: 15px;
-        }
-        .list-title {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        ul {
-            margin-top: 5px;
-        }
-        .footer {
-            margin-top: 50px;
-            padding-top: 20px;
-            border-top: 1px solid #ddd;
+        
+        .header .date {
+            color: #9ca3af;
             font-size: 12px;
-            color: #777;
+        }
+        
+        .section {
+            margin-bottom: 35px;
+            page-break-inside: avoid;
+        }
+        
+        .section-title {
+            color: #1f2937;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #f3f4f6;
+        }
+        
+        .ai-insights {
+            background: #fef3e8;
+            border: 2px solid #fed7aa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .ai-insights h3 {
+            color: #c2410c;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .insight-item {
+            margin-bottom: 12px;
+        }
+        
+        .insight-label {
+            font-weight: 600;
+            color: #c2410c;
+            margin-bottom: 4px;
+        }
+        
+        .insight-text {
+            color: #92400e;
+            line-height: 1.5;
+        }
+        
+        .matches-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .match-card {
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            background: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .match-card.top-match {
+            border-color: #ea580c;
+            background: #fef3e8;
+        }
+        
+        .match-header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .match-score {
+            background: #ea580c;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+        
+        .match-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+        
+        .match-type {
+            color: #6b7280;
+            font-size: 12px;
+        }
+        
+        .match-details {
+            margin-top: 15px;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 4px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .detail-label {
+            color: #6b7280;
+            font-size: 12px;
+        }
+        
+        .detail-value {
+            font-weight: 500;
+            color: #1f2937;
+            font-size: 12px;
+        }
+        
+        .strengths {
+            margin-top: 12px;
+        }
+        
+        .strengths h5 {
+            color: #065f46;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        
+        .strength-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 4px;
+            font-size: 11px;
+            color: #047857;
+        }
+        
+        .strength-item::before {
+            content: "✓";
+            color: #10b981;
+            font-weight: bold;
+            margin-right: 6px;
+            flex-shrink: 0;
+        }
+        
+        .chart-container {
+            text-align: center;
+            margin: 25px 0;
+            page-break-inside: avoid;
+        }
+        
+        .chart-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .user-profile {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        
+        .profile-item {
+            text-align: center;
+        }
+        
+        .profile-label {
+            color: #64748b;
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        
+        .profile-value {
+            color: #1e293b;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            text-align: center;
+            color: #6b7280;
+            font-size: 11px;
+        }
+        
+        .provider-analysis {
+            background: #f8fafc;
+            border-left: 4px solid #ea580c;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .provider-name {
+            color: #ea580c;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .provider-description {
+            color: #374151;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+        
+        .provider-description p {
+            margin-bottom: 12px;
+        }
+        
+        .provider-separator {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 30px 0;
+        }
+
+        .disclaimer {
+            background: #f9fafb;
+            border-left: 4px solid #d1d5db;
+            padding: 15px;
+            margin-top: 25px;
+            font-size: 11px;
+            color: #4b5563;
+            line-height: 1.4;
+        }
+        
+        @media print {
+            .page {
+                margin: 0;
+                padding: 20px;
+            }
+            
+            .section {
+                page-break-inside: avoid;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="page">
+        <!-- Header -->
         <div class="header">
-            <h1>Persoonlijk Beleggingsadvies</h1>
-            <p>Gebaseerd op jouw voorkeuren en doelstellingen</p>
+            <h1>Jouw Beleggingsrapport</h1>
+            <div class="subtitle">Gepersonaliseerde analyse van je top 3 matches</div>
+            <div class="date">Gegenereerd op {{ generated_date }}</div>
         </div>
-        
-        <div class="date">
-            Gegenereerd op: {{ date }}
-        </div>
-        
-        <h2>Jouw Beleggingsprofiel</h2>
-        <div class="summary-box">
-            <div class="summary-item">
-                <strong>Beleggingsdoel:</strong> {{ preferences.investment_goal }}
-            </div>
-            <div class="summary-item">
-                <strong>Beleggingshorizon:</strong> {{ preferences.investment_horizon }}
-            </div>
-            <div class="summary-item">
-                <strong>Beheerstijl:</strong> {{ preferences.management_style }}
-            </div>
-            <div class="summary-item">
-                <strong>Belangrijkste voorkeur:</strong> {{ preferences.preference }}
-            </div>
-            <div class="summary-item">
-                <strong>Indicatief bedrag:</strong> {{ preferences.amount }}
+
+        <!-- User Profile Summary -->
+        <div class="section">
+            <h2 class="section-title">Jouw Profiel</h2>
+            <div class="user-profile">
+                <div class="profile-grid">
+                    <div class="profile-item">
+                        <div class="profile-label">Inlegbedrag</div>
+                        <div class="profile-value">€{{ "{:,.0f}".format(user_profile.bedrag|default(0)) }}</div>
+                    </div>
+                    <div class="profile-item">
+                        <div class="profile-label">Type Dienst</div>
+                        <div class="profile-value">{{ user_profile.type_dienst|default('Niet gespecificeerd') }}</div>
+                    </div>
+                    <div class="profile-item">
+                        <div class="profile-label">Kosten Prioriteit</div>
+                        <div class="profile-value">{{ user_profile.kosten_belangrijkheid|default('Gemiddeld')|title }}</div>
+                    </div>
+                </div>
             </div>
         </div>
-        
-        <h2>Analyse en Advies</h2>
-        <p>
-            Op basis van jouw antwoorden hebben we een analyse gemaakt van je beleggingsprofiel 
-            en de meest geschikte partners voor jouw situatie. Hieronder vind je onze aanbevelingen,
-            gerangschikt op basis van match met jouw profiel.
-        </p>
-        
-        <h2>Top 3 Meest Geschikte Beleggingspartners</h2>
-        
-        {% for bank in matches %}
-        <div class="bank-card">
-            <div class="bank-name">{{ bank.name }}</div>
-            <div class="bank-desc">{{ bank.description }}</div>
-            
-            <div class="list-title">Sterke punten:</div>
-            <ul>
-                {% for strength in bank.strengths %}
-                <li>{{ strength }}</li>
+
+        <!-- AI Insights -->
+        <div class="section">
+            <h2 class="section-title">AI-Analyse</h2>
+            <div class="ai-insights">
+                <h3>Persoonlijke Aanbeveling</h3>
+                <div class="insight-text">{{ claude_analysis }}</div>
+            </div>
+        </div>
+
+        <!-- Top 3 Matches -->
+        <div class="section">
+            <h2 class="section-title">Jouw Top 3 Matches</h2>
+            <div class="matches-grid">
+                {% for match in matches[:3] %}
+                <div class="match-card {% if loop.index == 1 %}top-match{% endif %}">
+                    <div class="match-header">
+                        <div class="match-score">
+                            {% if loop.index == 1 %}#1{% elif loop.index == 2 %}#2{% else %}#3{% endif %}
+                            {{ match.matchScore|default(85) }}% match
+                        </div>
+                        <div class="match-name">{{ match.name|default(match.naam_aanbieder)|default('Partij ' + loop.index|string) }}</div>
+                        <div class="match-type">{{ match.type_aanbod|default('Beleggingsdienst') }}</div>
+                    </div>
+                    
+                    <div class="match-details">
+                        <div class="detail-row">
+                            <span class="detail-label">Totale kosten (TCO)</span>
+                            <span class="detail-value">
+                                {% if match.tco and match.tco > 0 %}
+                                    €{{ "{:,.0f}".format(match.tco) }}
+                                {% elif match.totale_kosten and match.totale_kosten > 0 %}
+                                    €{{ "{:,.0f}".format(match.totale_kosten) }}
+                                {% else %}
+                                    Vraag offerte aan
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Score</span>
+                            <span class="detail-value">{{ "%.1f"|format(match.score|default(8.0)) }}/10</span>
+                        </div>
+                        {% if match.minimum_bedrag %}
+                        <div class="detail-row">
+                            <span class="detail-label">Minimum bedrag</span>
+                            <span class="detail-value">€{{ "{:,.0f}".format(match.minimum_bedrag) }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    {% if match.strengths %}
+                    <div class="strengths">
+                        <h5>Sterke punten</h5>
+                        {% for strength in match.strengths[:3] %}
+                        <div class="strength-item">{{ strength }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
                 {% endfor %}
-            </ul>
-            
-            <div class="list-title">Aandachtspunten:</div>
-            <ul>
-                {% for weakness in bank.weaknesses %}
-                <li>{{ weakness }}</li>
-                {% endfor %}
-            </ul>
+            </div>
         </div>
-        {% endfor %}
-        
-        <h2>Vervolgstappen</h2>
-        <p>
-            Om verder te gaan met jouw beleggingsreis, raden wij de volgende stappen aan:
-        </p>
-        <ol>
-            <li>Neem contact op met de door jou gekozen partner voor een oriënterend gesprek</li>
-            <li>Bespreek jouw specifieke situatie en doelstellingen in detail</li>
-            <li>Vraag naar de mogelijkheden voor een persoonlijk beleggingsplan</li>
-            <li>Vergelijk de voorwaarden en kosten voordat je een definitieve keuze maakt</li>
-        </ol>
-        
+
+        <!-- Cost Comparison Chart -->
+        {% if cost_chart %}
+        <div class="section">
+            <h2 class="section-title">Kostenvergelijking</h2>
+            <div class="chart-container">
+                <img src="{{ cost_chart }}" alt="Kostenvergelijking Top 3 Matches" />
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Detailed Provider Analysis -->
+        <div class="section">
+            <h2 class="section-title">Uitgebreide Analyse per Aanbieder</h2>
+            
+            <!-- DEBUG INFO -->
+            <div style="background: #f0f0f0; padding: 10px; margin: 10px 0; font-size: 10px;">
+                DEBUG: Matches count = {{ matches|length }}<br>
+                {% for match in matches %}
+                Match {{ loop.index }}: {{ match.naam_aanbieder or match.name }} - beschrijving_lang = {{ 'YES' if match.beschrijving_lang else 'NO' }}<br>
+                {% endfor %}
+            </div>
+            
+            {% for match in matches %}
+            {% if match.beschrijving_lang %}
+            <div class="provider-analysis">
+                <h3 class="provider-name">{{ match.naam_aanbieder or match.name }}</h3>
+                <div class="provider-description">
+                    {{ match.beschrijving_lang|replace('\n', '</p><p>')|safe }}
+                </div>
+            </div>
+            {% if not loop.last %}<div class="provider-separator"></div>{% endif %}
+            {% else %}
+            <div style="background: #ffe6e6; padding: 10px; margin: 10px 0;">
+                <strong>{{ match.naam_aanbieder or match.name }}</strong>: Geen uitgebreide beschrijving beschikbaar
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+
+        <!-- Disclaimer -->
+        <div class="disclaimer">
+            <strong>Disclaimer:</strong> Dit rapport is gegenereerd door BeleggingsTinder op basis van de door u verstrekte informatie en onze database van beleggingsaanbieders. De informatie dient ter informatie en is geen financieel advies. Raadpleeg altijd een gekwalificeerde financieel adviseur voordat u beleggingsbeslissingen neemt. Kosten en voorwaarden kunnen wijzigen - controleer altijd de actuele informatie bij de aanbieder.
+        </div>
+
+        <!-- Footer -->
         <div class="footer">
-            <p>
-                <strong>Disclaimer:</strong> Dit document bevat geen beleggingsadvies in de zin van de wet. 
-                De informatie is puur informatief bedoeld en gebaseerd op jouw opgegeven voorkeuren. 
-                Voor een volledig advies, afgestemd op jouw persoonlijke situatie, raden wij aan om contact 
-                op te nemen met een financieel adviseur.
-            </p>
-            <p>
-                De gegevens in dit rapport zijn gebaseerd op de informatie die je hebt verstrekt
-                en geven een indicatie van mogelijke geschikte beleggingspartners. De uiteindelijke
-                keuze dient te worden gemaakt op basis van een volledig beeld van jouw financiële
-                situatie, doelstellingen en risicobereidheid.
-            </p>
-            <p>© Beleggingspartner Vergelijker, 2025</p>
+            <p>BeleggingsTinder © {{ generated_date.split()[2] }} | Gegenereerd met AI-ondersteuning</p>
         </div>
     </div>
 </body>

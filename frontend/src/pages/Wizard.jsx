@@ -58,44 +58,94 @@ const Wizard = () => {
       
       // Bouw dynamische vragen array
       const dynamicQuestions = [
-        {
-          id: 'type_dienst',
-          title: 'Welk type beleggingsdienst zoek je?',
-          description: 'Kies het type dienst dat het beste bij je wensen past.',
-          type: 'options',
-          options: uniqueTypes.map(type => ({
-            value: type,
-            label: type
-          }))
-        },
-        {
-          id: 'bedrag',
-          title: 'Welk bedrag ben je van plan te beleggen?',
-          description: 'Sleep de slider naar het gewenste bedrag.',
-          type: 'slider',
-          min: 0,
-          max: 1000000,
-          step: 5000,
-          defaultValue: 50000,
-          logScale: logScale, // Voor logaritmische weergave
-          helpText: 'Dit bedrag wordt gebruikt om diensten te filteren op minimum beleggingsbedrag.'
-        },
-        {
-          id: 'kosten_belangrijkheid',
-          title: 'Hoe belangrijk zijn lage kosten voor jou?',
-          description: 'Dit bepaalt welke diensten we voorstellen op basis van hun totale kosten.',
-          type: 'options',
-          helpText: 'Zeer belangrijk: alleen diensten met <1.5% totale kosten. Belangrijk: diensten met <2.2% totale kosten. Niet belangrijk: alle diensten.',
-          options: [
-            { value: 'zeer_belangrijk', label: 'Zeer belangrijk - Ik wil de laagste kosten' },
-            { value: 'belangrijk', label: 'Belangrijk - Kosten wegen mee in mijn beslissing' },
-            { value: 'niet_belangrijk', label: 'Niet belangrijk - Andere factoren zijn belangrijker' }
-          ]
-        }
-      ];
-      
-      setQuestions(dynamicQuestions);
-      setQuestionsLoading(false);
+  {
+    id: 'type_dienst',
+    title: 'Welk type belegger ben je?',
+    description: 'Kies de aanpak die het beste bij jouw voorkeur en ervaring past.',
+    type: 'options',
+    helpText: 'Doe-het-zelf: je handelt zelf en bepaalt je eigen strategie. Samen beleggen: je krijgt advies of laat het beheer over aan professionals. Pensioensparen: specifiek voor pensioenopbouw met fiscale voordelen.',
+    options: [
+      { value: 'Doe-het-zelf', label: 'Doe-het-zelf - Ik handel zelf en bepaal mijn strategie' },
+      { value: 'Samen of laten beleggen', label: 'Samen of laten beleggen - Ik wil advies of beheer' },
+      { value: 'Pensioensparen', label: 'Pensioensparen - Ik wil fiscaal voordelig sparen voor pensioen' }
+    ]
+  },
+  {
+    id: 'bedrag',
+    title: 'Welk bedrag ben je van plan te beleggen?',
+    description: 'Sleep de slider naar het gewenste bedrag.',
+    type: 'slider',
+    min: 0,
+    max: 1000000,
+    step: 5000,
+    defaultValue: 50000,
+    logScale: logScale, // Voor logaritmische weergave
+    helpText: 'Dit bedrag wordt gebruikt om diensten te filteren op minimum beleggingsbedrag.'
+  },
+  {
+    id: 'kosten_belangrijkheid',
+    title: 'Hoe belangrijk zijn lage kosten voor jou?',
+    description: 'Dit bepaalt welke diensten we voorstellen op basis van hun totale kosten.',
+    type: 'options',
+    helpText: 'Zeer belangrijk: alleen diensten met <1.5% totale kosten. Belangrijk: diensten met <2.2% totale kosten. Niet belangrijk: alle diensten.',
+    options: [
+      { value: 'zeer_belangrijk', label: 'Zeer belangrijk - Ik wil de laagste kosten' },
+      { value: 'belangrijk', label: 'Belangrijk - Kosten wegen mee in mijn beslissing' },
+      { value: 'niet_belangrijk', label: 'Niet belangrijk - Andere factoren zijn belangrijker' }
+    ]
+  },
+  {
+    id: 'duurzaamheid_belangrijkheid',
+    title: 'Hoe belangrijk is duurzaam beleggen voor jou?',
+    description: 'Sommige aanbieders focussen meer op ESG-criteria en duurzame beleggingen.',
+    type: 'options',
+    helpText: 'Duurzame beleggingen houden rekening met milieu, sociale aspecten en goed bestuur (ESG). Dit kan invloed hebben op rendement en risico.',
+    options: [
+      { value: 'heel_belangrijk', label: 'Heel belangrijk - Ik wil alleen duurzaam beleggen' },
+      { value: 'belangrijk', label: 'Belangrijk - Het weegt mee in mijn keuze' },
+      { value: 'geen_voorkeur', label: 'Geen voorkeur - Rendement is belangrijker' }
+    ]
+  },
+  {
+    id: 'begeleiding_belangrijkheid',
+    title: 'Hoeveel persoonlijke begeleiding wil je?',
+    description: 'Sommige diensten bieden intensieve begeleiding, andere laten je meer zelfstandig werken.',
+    type: 'options',
+    helpText: 'Persoonlijke begeleiding kan variëren van alleen online hulp tot een vaste adviseur die je regelmatig spreekt.',
+    options: [
+      { value: 'heel_belangrijk', label: 'Heel belangrijk - Ik wil veel persoonlijke begeleiding' },
+      { value: 'belangrijk', label: 'Belangrijk - Af en toe contact is fijn' },
+      { value: 'geen_voorkeur', label: 'Geen voorkeur - Ik regel het liever zelf' }
+    ]
+  },
+  {
+    id: 'functionaliteiten_belangrijkheid',
+    title: 'Hoe belangrijk zijn uitgebreide functionaliteiten?',
+    description: 'Denk aan trading tools, research, apps, analyses en andere extra mogelijkheden.',
+    type: 'options',
+    helpText: 'Uitgebreide functionaliteiten kunnen zijn: geavanceerde grafieken, research rapporten, mobile apps, automatisch beleggen, etc.',
+    options: [
+      { value: 'heel_belangrijk', label: 'Heel belangrijk - Ik wil veel tools en mogelijkheden' },
+      { value: 'belangrijk', label: 'Belangrijk - Basis functionaliteiten zijn niet genoeg' },
+      { value: 'geen_voorkeur', label: 'Geen voorkeur - Simpel is prima voor mij' }
+    ]
+  },
+  {
+    id: 'rendement_belangrijkheid',
+    title: 'Hoe belangrijk is historisch rendement?',
+    description: 'Sommige aanbieders hebben bewezen betere rendementen behaald over de afgelopen jaren.',
+    type: 'options',
+    helpText: 'Let op: historisch rendement is geen garantie voor toekomstig rendement, maar kan wel een indicatie zijn van de kwaliteit van het beheer.',
+    options: [
+      { value: 'heel_belangrijk', label: 'Heel belangrijk - Rendement staat voorop' },
+      { value: 'belangrijk', label: 'Belangrijk - Het telt mee in mijn afweging' },
+      { value: 'geen_voorkeur', label: 'Geen voorkeur - Andere factoren zijn belangrijker' }
+    ]
+  }
+];
+
+setQuestions(dynamicQuestions);
+setQuestionsLoading(false);
       
     } catch (error) {
       console.error('Error loading dynamic questions:', error);
@@ -178,7 +228,7 @@ const Wizard = () => {
   // Productie-ready matching functie
   const getMatches = async (userAnswers) => {
     // Gebruik altijd de optimized endpoint
-    const response = await fetch(`${API_URL}/match-diensten-optimized`, {
+    const response = await fetch(`${API_URL}/match-diensten-enhanced`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from app.core.supabase_client import supabase
 import logging
 
-router = APIRouter(prefix="/api/banks", tags=["banks"])
+router = APIRouter(tags=["banks"])
 
 @router.get("/")
 async def get_all_banks():

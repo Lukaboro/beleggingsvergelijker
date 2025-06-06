@@ -3,7 +3,7 @@ from app.core.supabase_client import supabase
 import logging
 from typing import Optional, List
 
-router = APIRouter(prefix="/api/tables", tags=["tables"])
+router = APIRouter(tags=["tables"])
 
 # Toegestane tabellen voor security - JUISTE NAMEN
 ALLOWED_TABLES = {

@@ -13,14 +13,12 @@ from app.utils.pdf_generator import generate_report
 from app.api.banks import router as banks_router
 from app.api.tables import router as tables_router
 from app.api.matching import router as matching_router
+from app.api.ai_report import router as ai_report_router
+from app.api.reports import router as reports_router
 
 app = FastAPI(title="Beleggingspartner Vergelijker API")
-# Register API routers
-app.include_router(banks_router)
-app.include_router(tables_router)
-app.include_router(matching_router)
-                   
-# CORS middleware voor lokale ontwikkeling
+
+# CORS middleware voor lokale ontwikkeling (SINGLE!)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Voor productie zet dit op de specifieke origin
@@ -32,12 +30,24 @@ app.add_middleware(
 # Zorg ervoor dat de reports directory bestaat
 os.makedirs("reports", exist_ok=True)
 
-# Mount de reports directory als statische bestanden
-app.mount("/api/reports", StaticFiles(directory="reports"), name="reports")
+# Register API routers (CLEAN ORDER!)
+app.include_router(banks_router, prefix="/api")
+app.include_router(tables_router, prefix="/api/tables") 
+app.include_router(matching_router, prefix="/api")
+app.include_router(ai_report_router, prefix="/api")  # ✅ This should work now!
+app.include_router(reports_router, prefix="/api/reports")
+
+# Mount static files AFTER routers
+app.mount("/api/static", StaticFiles(directory="reports"), name="static_reports")
 
 @app.get("/")
 async def root():
-    return {"message": "Welcome to Beleggingspartner Vergelijker API"}
+    return {"message": "Beleggingspartner Vergelijker API is running"}
+
+# Health check endpoint
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "timestamp": datetime.now().isoformat()}
 
 class UserPreferences(BaseModel):
     investment_goal: str

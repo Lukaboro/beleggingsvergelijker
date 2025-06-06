@@ -21,7 +21,7 @@ app = FastAPI(title="Beleggingspartner Vergelijker API")
 # CORS middleware voor lokale ontwikkeling (SINGLE!)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Voor productie zet dit op de specifieke origin
+    allow_origins=["https://beleggingsvergelijker.vercel.app"],  # Voor productie zet dit op de specifieke origin
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

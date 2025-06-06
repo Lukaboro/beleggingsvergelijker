@@ -413,19 +413,12 @@ async def generate_ai_insights(request_data: Dict[str, Any]):
         print(f"❌ ERROR in generate_ai_insights: {str(e)}")
         import traceback
         traceback.print_exc()
-        
-        # Return fallback insights
+
         return {
             "success": True,
             "insights": generate_fallback_insights(matches if 'matches' in locals() else [], user_preferences if 'user_preferences' in locals() else {})
-        }   
-    except Exception as e:
-        logging.error(f"Error generating AI insights: {str(e)}")
-        # Return fallback insights
-        return {
-            "success": True,
-            "insights": generate_fallback_insights(matches, user_preferences)
         }
+
 
 def build_insights_context(matches: List[Dict[str, Any]], user_preferences: Dict[str, Any]) -> Dict[str, Any]:
     """Build lightweight context for quick insights with detailed analysis"""

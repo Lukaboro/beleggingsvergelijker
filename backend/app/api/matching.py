@@ -4,13 +4,21 @@ import logging
 import statistics
 from typing import Dict, Any, List
 import math
+from difflib import SequenceMatcher
+
+def is_similar_name(name_a, name_b, threshold=0.75):
+    """Vergelijkt twee namen op basis van gelijkenis, onafhankelijk van 'Bank', hoofdletters etc."""
+    def clean(s):
+        return s.lower().replace("bank", "").replace("belgië", "").strip()
+    
+    return SequenceMatcher(None, clean(name_a), clean(name_b)).ratio() >= threshold
 
 router = APIRouter(tags=["matching"])
 
 @router.post("/match-diensten-enhanced")
 async def match_diensten_enhanced(user_preferences: Dict[str, Any]):
     """
-    ENHANCED Match diensten - Multi-criteria scoring met gewogen factoren
+    ENHANCED Match diensten - Multi-criteria scoring met gewogen factoren + BANK FILTERING
     """
     try:
         logging.info(f"Enhanced matching aanvraag: {user_preferences}")
@@ -18,6 +26,11 @@ async def match_diensten_enhanced(user_preferences: Dict[str, Any]):
         # Extract user preferences
         type_dienst = user_preferences.get("type_dienst")
         bedrag = user_preferences.get("bedrag", 0)
+        bank_filter = user_preferences.get("bank_filter")  # NEW: Bank filtering
+        
+        logging.info(f"🔍 DEBUG: Received bedrag: {bedrag} (type: {type(bedrag)})")
+        logging.info(f"🏦 DEBUG: Bank filter: {bank_filter}")
+        
         kosten_belangrijk = user_preferences.get("kosten_belangrijkheid", "geen_voorkeur")
         duurzaamheid_belangrijk = user_preferences.get("duurzaamheid_belangrijkheid", "geen_voorkeur")
         begeleiding_belangrijk = user_preferences.get("begeleiding_belangrijkheid", "geen_voorkeur")
@@ -38,8 +51,25 @@ async def match_diensten_enhanced(user_preferences: Dict[str, Any]):
             type_filter = ",".join([f'"{t}"' for t in db_types])
             filters += f"&type_aanbod=in.({type_filter})"
         
+        # NEW: Add bank filtering to database query
+        if bank_filter:
+            filter_type = bank_filter.get('type')
+            banks = bank_filter.get('banks', [])
+            
+            if filter_type == 'include' and banks:
+                # Only include specified banks
+                bank_filter_str = ",".join([f'"{bank}"' for bank in banks])
+                filters += f"&naam_aanbieder=in.({bank_filter_str})"
+                logging.info(f"🏦 Including only banks: {banks}")
+                
+            elif filter_type == 'exclude' and banks:
+                # Exclude specified banks
+                bank_filter_str = ",".join([f'"{bank}"' for bank in banks])
+                filters += f"&naam_aanbieder=not.in.({bank_filter_str})"
+                logging.info(f"🏦 Excluding banks: {banks}")
+        
         diensten = await supabase.select("diensten", f"*&{filters}")
-        logging.info(f"Gevonden {len(diensten)} diensten van type {type_dienst}")
+        logging.info(f"Gevonden {len(diensten)} diensten van type {type_dienst} (na bank filtering)")
         
         # Stap 2: Filter op minimum bedrag
         filtered_diensten = []
@@ -47,7 +77,8 @@ async def match_diensten_enhanced(user_preferences: Dict[str, Any]):
             minimum = dienst.get("minimum")
             if minimum is None or bedrag >= minimum:
                 filtered_diensten.append(dienst)
-        
+        logging.info(f"🔍 DEBUG: First few diensten minimums: {[(d.get('naam_aanbieder'), d.get('minimum')) for d in diensten[:3]]}")
+        logging.info(f"🔍 DEBUG: After bedrag filter: {len(filtered_diensten)} diensten remaining")
         logging.info(f"Na bedrag filtering: {len(filtered_diensten)} diensten over")
         
         if not filtered_diensten:
@@ -57,8 +88,6 @@ async def match_diensten_enhanced(user_preferences: Dict[str, Any]):
                 "total_found": 0,
                 "message": "Geen diensten gevonden die voldoen aan uw criteria"
             }
-        
-
 
         # Stap 3: Bulk data ophalen voor alle benodigde tabellen
         dienst_ids = [d.get("dienst_id") for d in filtered_diensten]
@@ -111,6 +140,13 @@ async def match_diensten_enhanced(user_preferences: Dict[str, Any]):
             # Bereken gewogen totaalscore
             total_score = calculate_weighted_score(scores, gewichten)
             
+            # NEW: Apply bank boost if specified
+            if bank_filter and bank_filter.get('type') == 'boost':
+                boosted_banks = bank_filter.get('banks', [])
+                if any(bank in dienst.get('naam_aanbieder', '') for bank in boosted_banks):
+                    total_score *= 1.1  # 10% boost for preferred banks
+                    logging.info(f"🚀 Applied boost to {dienst.get('naam_aanbieder')}")
+            
             # Converteer naar percentage (scores zijn 1-10, gewichten sommeren tot 1.0)
             match_score = score_to_match_percentage(total_score)
             
@@ -141,11 +177,12 @@ async def match_diensten_enhanced(user_preferences: Dict[str, Any]):
         
         return {
             "success": True,
-            "matches": matches[:3],  # Top 3
+            "matches": matches[:30],  # Allemaal opmaken om te kunnen boosten na top 3, enkel eerste 3 worden getoond in de front
             "total_found": len(matches),
             "filters_applied": {
                 "type_dienst": type_dienst,
                 "bedrag": bedrag,
+                "bank_filter": bank_filter,  # NEW: Include bank filter info
                 "gewichten": {
                     "kosten": get_weight(kosten_belangrijk),
                     "duurzaamheid": get_weight(duurzaamheid_belangrijk),
@@ -380,13 +417,22 @@ async def debug_score_calculation(request: Request):
         return {"success": False, "error": str(e)}
 
 # BEHOUDT de bestaande optimized functie voor backward compatibility
+# VERVANG de laatste match_diensten_enhanced functie (vanaf regel ~180) met deze versie:
+
 @router.post("/match-diensten-enhanced")
 async def match_diensten_enhanced(user_preferences: Dict[str, Any]):
     """
-    ENHANCED Match diensten - Multi-criteria scoring met gewogen factoren
+    ENHANCED Match diensten - Multi-criteria scoring met gewogen factoren + BANK FILTERING + SOFT PREFERENCES
     """
     try:
         logging.info(f"Enhanced matching aanvraag: {user_preferences}")
+        
+        # 🏦 Extract bank filter + soft preferences
+        bank_filter = user_preferences.get('bank_filter', {})
+        soft_preferences = user_preferences.get('soft_preferences', [])
+        
+        logging.info(f"🏦 DEBUG: Bank filter received: {bank_filter}")
+        logging.info(f"🎯 DEBUG: Soft preferences received: {soft_preferences}")
         
         # Extract user preferences
         type_dienst = user_preferences.get("type_dienst")
@@ -411,6 +457,23 @@ async def match_diensten_enhanced(user_preferences: Dict[str, Any]):
             type_filter = ",".join([f'"{t}"' for t in db_types])
             filters += f"&type_aanbod=in.({type_filter})"
         
+        # 🏦 Bank filtering toevoegen
+        if bank_filter:
+            filter_type = bank_filter.get('type')
+            banks = bank_filter.get('banks', [])
+            
+            if filter_type == 'include' and banks:
+                bank_filter_str = ",".join([f'"{bank}"' for bank in banks])
+                filters += f"&naam_aanbieder=in.({bank_filter_str})"
+                logging.info(f"🏦 INCLUDE filter toegepast: {banks}")
+                
+            elif filter_type == 'exclude' and banks:
+                bank_filter_str = ",".join([f'"{bank}"' for bank in banks])
+                filters += f"&naam_aanbieder=not.in.({bank_filter_str})"
+                logging.info(f"🏦 EXCLUDE filter toegepast: {banks}")
+        
+        logging.info(f"🔍 Final database filters: {filters}")
+        
         diensten = await supabase.select("diensten", f"*&{filters}")
         logging.info(f"Gevonden {len(diensten)} diensten van type {type_dienst}")
         
@@ -428,30 +491,25 @@ async def match_diensten_enhanced(user_preferences: Dict[str, Any]):
                 "success": True,
                 "matches": [],
                 "total_found": 0,
-                "message": "Geen diensten gevonden die voldoen aan uw criteria"
+                "message": "Geen diensten gevonden die voldoen aan uw criteria",
+                "filters_applied": {"bank_filter": bank_filter}
             }
         
-        # VERWIJDER DEZE INCORRECTE CODE BLOCK (regel 65-76)
-        # Het checkt voor 'impacts' variabele die hier niet bestaat
-        # Deze logica hoort alleen in de recalculate_matches functie
-        
-        # Stap 3: Bulk data ophalen voor alle benodigde tabellen
+        # Stap 3: Bulk data ophalen
         dienst_ids = [d.get("dienst_id") for d in filtered_diensten]
         dienst_ids_str = ",".join(map(str, dienst_ids))
         
-        # Haal alle benodigde data op in bulk queries
         all_kosten = await supabase.select("kosten", f"*&dienst_id=in.({dienst_ids_str})")
         all_functionaliteiten = await supabase.select("functionaliteiten", f"*&dienst_id=in.({dienst_ids_str})")
         all_rendementen = await supabase.select("rendementen", f"*&dienst_id=in.({dienst_ids_str})")
         
-        # Create lookups
         kosten_lookup = {k['dienst_id']: k for k in all_kosten}
         functionaliteiten_lookup = {f['dienst_id']: f for f in all_functionaliteiten}
         rendementen_lookup = {r['dienst_id']: r for r in all_rendementen}
         
         logging.info(f"Data opgehaald voor {len(filtered_diensten)} diensten")
         
-        # Stap 4: Bereken percentiel-based scores voor TCO en rendement
+        # Stap 4: Bereken percentiel scores
         tco_scores = calculate_percentile_scores([kosten_lookup.get(d['dienst_id'], {}).get('tco') for d in filtered_diensten], reverse=True)
         rendement_scores = calculate_percentile_scores([rendementen_lookup.get(d['dienst_id'], {}).get('rendement_5j') for d in filtered_diensten], reverse=False)
         
@@ -459,6 +517,7 @@ async def match_diensten_enhanced(user_preferences: Dict[str, Any]):
         matches = []
         for i, dienst in enumerate(filtered_diensten):
             dienst_id = dienst.get("dienst_id")
+            naam_aanbieder = dienst.get("naam_aanbieder", "Onbekende aanbieder")
             
             # Haal data op
             kosten_data = kosten_lookup.get(dienst_id, {})
@@ -474,7 +533,7 @@ async def match_diensten_enhanced(user_preferences: Dict[str, Any]):
                 'rendement': rendement_scores[i] if rendement_scores[i] is not None else 5
             }
             
-            # Bereken gewichten op basis van gebruikersvoorkeuren
+            # Bereken gewichten
             gewichten = {
                 'duurzaamheid': get_weight(duurzaamheid_belangrijk),
                 'begeleiding': get_weight(begeleiding_belangrijk),
@@ -486,14 +545,23 @@ async def match_diensten_enhanced(user_preferences: Dict[str, Any]):
             # Bereken gewogen totaalscore
             total_score = calculate_weighted_score(scores, gewichten)
             
-            # Converteer naar percentage (scores zijn 1-10, gewichten sommeren tot 1.0)
+            # Bank boost (existing logic)
+            boost_applied = False
+            if bank_filter.get('type') == 'boost':
+                boost_banks = bank_filter.get('banks', [])
+                if boost_banks and any(bank in naam_aanbieder for bank in boost_banks):
+                    total_score = min(10.0, total_score + 1.0)
+                    boost_applied = True
+                    logging.info(f"🏦 BOOST toegepast op {naam_aanbieder}: +1.0 punt")
+            
+            # Converteer naar percentage
             match_score = score_to_match_percentage(total_score)
             
             match = {
                 "id": f"dienst_{dienst_id}",
-                "name": dienst.get("naam_aanbieder", "Onbekende aanbieder"),
-                "logo": f"{dienst.get('naam_aanbieder', 'default').lower().replace(' ', '_')}.svg",
-                "description": f"{dienst.get('type_aanbod')} van {dienst.get('naam_aanbieder')}",
+                "name": naam_aanbieder,
+                "logo": f"{naam_aanbieder.lower().replace(' ', '_')}.svg",
+                "description": f"{dienst.get('type_aanbod')} van {naam_aanbieder}",
                 "strengths": parse_db_strengths(dienst.get("sterktes", "")),
                 "weaknesses": parse_db_weaknesses(dienst.get("zwaktes", "")),
                 "matchScore": match_score,
@@ -506,7 +574,8 @@ async def match_diensten_enhanced(user_preferences: Dict[str, Any]):
                     "kenmerken": dienst.get("kenmerken"),
                     "scores": scores,
                     "gewichten": gewichten,
-                    "total_score": total_score
+                    "total_score": total_score,
+                    "boost_applied": boost_applied
                 }
             }
             matches.append(match)
@@ -514,15 +583,24 @@ async def match_diensten_enhanced(user_preferences: Dict[str, Any]):
         # Sorteer op matchScore
         matches.sort(key=lambda x: x["matchScore"], reverse=True)
         
+        # 🎯 NIEUW: Apply soft preferences
+        if soft_preferences:
+            logging.info(f"🚀 Applying {len(soft_preferences)} soft preferences...")
+            matches = apply_soft_preferences(matches, soft_preferences)
+        else:
+            logging.info("ℹ️ No soft preferences to apply")
+        
         logging.info(f"✅ Enhanced matching succesvol: {len(matches)} matches gevonden")
         
         return {
             "success": True,
-            "matches": matches[:3],  # Top 3
+            "matches": matches[:10],  # Return 10 matches instead of 3 to see boost effect
             "total_found": len(matches),
             "filters_applied": {
                 "type_dienst": type_dienst,
                 "bedrag": bedrag,
+                "bank_filter": bank_filter,
+                "soft_preferences": soft_preferences,  # Include in response
                 "gewichten": {
                     "kosten": get_weight(kosten_belangrijk),
                     "duurzaamheid": get_weight(duurzaamheid_belangrijk),
@@ -536,6 +614,65 @@ async def match_diensten_enhanced(user_preferences: Dict[str, Any]):
     except Exception as e:
         logging.error(f"Error in enhanced matching: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Enhanced matching error: {str(e)}")
+
+def apply_soft_preferences(matches, soft_preferences):
+    """Apply soft preference actions to matches"""
+    logging.info(f"🚀 Applying soft preferences: {soft_preferences}")
+    
+    for preference in soft_preferences:
+        action = preference.get('action')
+        
+        if action == 'boost_banks':
+            banks_to_boost = preference.get('banks', [])
+            boost_factor = 1.4  # 40% boost
+            
+            logging.info(f"💪 Boosting banks: {banks_to_boost} with factor {boost_factor}")
+            
+            boosted_count = 0
+            for match in matches:
+                bank_name = match.get('name', '')
+                
+                # Check if this bank should be boosted
+                def normalize(text):
+                    return text.lower().replace("bank", "").replace("belgië", "").strip()
+
+                should_boost = any(normalize(boost_bank) in normalize(bank_name) for boost_bank in banks_to_boost)
+
+                
+                if should_boost:
+                    old_score = match['matchScore']
+                    new_score = min(99, int(old_score * boost_factor))  # Cap at 99%
+                    match['matchScore'] = new_score
+                    match['details']['boost_applied'] = True
+                    boosted_count += 1
+                    
+                    logging.info(f"📈 {bank_name}: {old_score}% → {new_score}% (SOFT BOOST)")
+                else:
+                    # Ensure boost_applied is set to False for non-boosted banks
+                    if not match['details'].get('boost_applied', False):
+                        match['details']['boost_applied'] = False
+            
+            logging.info(f"✅ Soft boosted {boosted_count} banks matching {banks_to_boost}")
+        
+        elif action == 'exclude_banks':
+            banks_to_exclude = preference.get('banks', [])
+            logging.info(f"❌ Excluding banks: {banks_to_exclude}")
+            
+            original_count = len(matches)
+            matches = [
+                match for match in matches 
+                if not any(exclude_bank.lower() in match.get('name', '').lower() 
+                          for exclude_bank in banks_to_exclude)
+            ]
+            excluded_count = original_count - len(matches)
+            logging.info(f"❌ Excluded {excluded_count} banks")
+    
+    # Re-sort matches by score after applying preferences
+    matches.sort(key=lambda x: x['matchScore'], reverse=True)
+    logging.info(f"🔄 Re-sorted {len(matches)} matches by new scores")
+    
+    return matches
+    
 def get_weight(importance: str) -> float:
     """Converteer gebruikers belangrijkheid naar numeriek gewicht"""
     weights = {

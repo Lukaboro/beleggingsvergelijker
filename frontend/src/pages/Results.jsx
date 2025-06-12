@@ -93,6 +93,16 @@ const ResultsPage = () => {
     fetchResults();
   }, []);
 
+  // Debug logging - TIJDELIJK
+useEffect(() => {
+  if (matches.length > 0) {
+    console.log(`📊 Showing ${matches.length} matches out of total available:`);
+    matches.forEach((match, index) => {
+      console.log(`${index + 1}. ${match.name}: ${match.matchScore}% (boost: ${match.details?.boost_applied || false})`);
+    });
+  }
+}, [matches]);
+
   const fetchAiInsights = async (matches, userPreferences) => {
     try {
       const response = await fetch(`${API_URL}/generate-ai-insights`, {
@@ -129,6 +139,82 @@ const ResultsPage = () => {
     setContactType('guidance');
     setShowEmailForm(true);
   };
+
+// ADD THIS FUNCTION TO YOUR ResultsPage.jsx (around line 130, near other handler functions)
+
+const handleTextSubmit = async (textInput) => {
+  console.log("🔥 FRONTEND: Text being sent:", textInput);
+  console.log("🔥 FRONTEND: Text length:", textInput.length);
+  
+  if (!textInput.trim()) {
+    alert("Voer eerst tekst in");
+    return;
+  }
+  
+  try {
+    const userPreferences = JSON.parse(localStorage.getItem('userPreferences')) || {};
+    
+    const requestBody = {
+      text: textInput,
+      preferences: userPreferences
+    };
+    
+    console.log("🔥 FRONTEND: Request body:", requestBody);
+    
+    const response = await fetch(`${API_URL}/text-processing/process-text-and-match`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(requestBody)
+    });
+    
+    console.log("🔥 FRONTEND: Response status:", response.status);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log("🔥 FRONTEND: Backend response:", data);
+    
+    if (data.success) {
+      handleTextRefinement(data);
+    } else {
+      alert(`Error: ${data.error}`);
+    }
+  } catch (error) {
+    console.error("❌ FRONTEND: Network error:", error);
+    alert(`Network error: ${error.message}`);
+  }
+};
+
+  // Voeg toe bij je andere handler functions (rond regel 130-140)
+const handleTextRefinement = async ({ updatedPreferences, matches: newMatches, textAnalysis, preferencesChanged, originalText }) => {
+  console.log("🎯 Text refinement results:", {
+    updatedPreferences,
+    newMatches,
+    textAnalysis,
+    preferencesChanged,
+    originalText
+  });
+
+  if (preferencesChanged) {
+    // Update localStorage with new preferences
+    localStorage.setItem('userPreferences', JSON.stringify(updatedPreferences));
+    
+    // Update matches state
+    setMatches(newMatches);
+    setHasRecalculated(true);
+    
+    // Show feedback to user
+    alert(`✅ AI analyse voltooid: "${textAnalysis.reasoning}"`);
+    
+    // Fetch new AI insights for refined matches
+    fetchAiInsights(newMatches, updatedPreferences);
+  }
+};
 
   // FIXED handleIterativeAnswers functie
   const handleIterativeAnswers = async (impacts) => {
@@ -508,6 +594,9 @@ const ResultsPage = () => {
           matches={matches}
           userPreferences={JSON.parse(localStorage.getItem('userPreferences')) || {}}
           onAnswerSubmit={handleIterativeAnswers}
+          onTextRefinement={handleTextRefinement}
+          onTextSubmit={handleTextSubmit}  // 👈 ADD THIS LINE
+          showTextRefinement={true}
           isRecalculating={isRecalculating}
         />
 
